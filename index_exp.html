@@ -1,0 +1,2945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ornate Std Support - Executive Ticketing & Performance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface2: #F1F5F9;
+  --border: #E2E8F0;
+  --border2: #CBD5E1;
+  
+  --text: #0F172A;
+  --text2: #475569;
+  --text3: #94A3B8;
+  
+  --blue: #2563EB;
+  --blue-light: #EFF6FF;
+  --blue-mid: #BFDBFE;
+  
+  --green: #16A34A;
+  --green-light: #ECFDF5;
+  --green-text: #15803D;
+  --green-subtle: #86EFAC;
+  
+  --red: #DC2626;
+  --red-light: #FFF1F2;
+  --red-subtle: #FDA4AF;
+  --red-text: #E11D48;
+  
+  --amber: #D97706;
+  --amber-light: #FEF3C7;
+  --amber-text: #B45309;
+  
+  --indigo: #4F46E5;
+  --indigo-light: #EEF2FF;
+  --indigo-text: #4338CA;
+  
+  --purple: #7C3AED;
+  --purple-light: #F5F3FF;
+  --neutral: #CBD5E1;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+  
+  --radius: 12px;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13.5px;height:100vh;overflow:hidden;}
+
+/* ── SCREEN VISIBILITY ── */
+.screen{display:none;width:100%;height:100vh;}
+.screen.active{display:flex;}
+.hidden{display:none !important;}
+
+/* ── MODALS & OVERLAYS ── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.modal-overlay.active {
+  opacity: 1; pointer-events: auto;
+}
+.modal-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; width: 680px; max-width: 92vw; max-height: 88vh;
+  box-shadow: var(--shadow-lg); padding: 24px; overflow-y: auto;
+}
+
+/* ── SPIN ANIMATION ── */
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; display: inline-block; transform-origin: center; }
+
+/* ── LOGIN SCREEN ── */
+#screenLogin {
+  align-items:center; justify-content:center;
+  background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+}
+.login-card {
+  background:var(--surface); border-radius:20px; padding:40px;
+  width:420px; max-width:92vw; box-shadow:var(--shadow-lg);
+}
+.login-logo {
+  width:48px; height:48px; background:linear-gradient(135deg, var(--blue) 0%, #1D4ED8 100%);
+  border-radius:14px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:22px; font-weight:800; margin-bottom:20px; box-shadow:0 4px 12px rgba(37,99,235,0.3);
+}
+
+/* ── APP LAYOUT ── */
+#screenApp{flex-direction:row; position:relative;}
+
+/* SIDEBAR */
+.sidebar {
+  width:240px; min-width:240px; background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:18px 12px;
+}
+.sb-brand {
+  display:flex; align-items:center; gap:12px; padding:0 8px 18px; border-bottom:1px solid var(--border);
+}
+.sb-logo {
+  width:38px; height:38px; background:var(--blue); border-radius:10px;
+  color:#fff; font-size:18px; font-weight:800; display:flex; align-items:center; justify-content:center;
+}
+.sb-nav-section {
+  font-size:10.5px; font-weight:800; color:var(--text3); letter-spacing:0.8px;
+  text-transform:uppercase; margin:16px 8px 6px;
+}
+.sb-item {
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px;
+  color:var(--text2); font-weight:600; cursor:pointer; transition:all 0.15s; font-size:13px;
+  margin-bottom:2px;
+}
+.sb-item:hover {background:var(--surface2); color:var(--text);}
+.sb-item.active {background:var(--blue-light); color:var(--blue); font-weight:700;}
+.sb-user {
+  margin-top:auto; background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+  padding:12px; display:flex; align-items:center; gap:10px; margin-bottom:8px;
+}
+.sb-avatar {
+  width:34px; height:34px; border-radius:50%; background:var(--blue); color:#fff;
+  font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.sb-logout {
+  padding:10px 12px; color:var(--red-text); font-weight:700; cursor:pointer; border-radius:10px;
+  display:flex; align-items:center; gap:8px; font-size:12.5px; transition:background 0.15s;
+}
+.sb-logout:hover {background:var(--red-light);}
+
+/* MAIN CONTENT */
+.main {flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); position:relative;}
+
+.header-bar {
+  height:64px; background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.header-title {font-size:18px; font-weight:800; color:var(--text);}
+.header-sub {font-size:12px; color:var(--text3); font-weight:600;}
+.header-actions {display:flex; align-items:center; gap:12px;}
+
+.btn-new-ticket {
+  background:linear-gradient(135deg, var(--blue) 0%, #1D4ED8 100%); color:#fff; border:none;
+  border-radius:10px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer;
+  display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(37,99,235,0.25);
+  transition:all 0.15s;
+}
+.btn-new-ticket:hover {transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,0.35);}
+
+.top-icon-btn {
+  width:38px; height:38px; border-radius:10px; border:1px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+  font-size:16px; transition:all 0.15s;
+}
+.top-icon-btn:hover {border-color:var(--blue-mid); background:var(--blue-light);}
+.notif-badge {
+  position:absolute; top:-3px; right:-3px; background:var(--red); color:#fff;
+  font-size:10px; font-weight:800; padding:1px 5px; border-radius:10px; border:2px solid #fff;
+}
+
+/* IN-APP NOTIFICATION DRAWER */
+.notif-panel {
+  position:absolute; top:70px; right:24px; width:340px; background:var(--surface);
+  border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-lg);
+  z-index:200; display:none; flex-direction:column; overflow:hidden;
+}
+.notif-panel.active {display:flex;}
+.np-header {padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
+.np-title {font-weight:800; font-size:13.5px;}
+.np-clear {font-size:11.5px; color:var(--blue); font-weight:700; cursor:pointer;}
+.np-body {max-height:320px; overflow-y:auto; padding:8px 0;}
+.np-item {padding:10px 16px; border-bottom:1px solid var(--surface2); cursor:pointer; transition:background 0.15s;}
+.np-item:hover {background:var(--blue-light);}
+.np-item-time {font-size:10.5px; color:var(--text3); font-weight:600; margin-top:2px;}
+
+/* PAGES */
+.page {display:none; flex:1; overflow-y:auto; padding:20px 24px 70px;}
+.page.active {display:block;}
+
+/* WELCOME BANNER & KPI CARDS */
+.welcome-bar {
+  background:linear-gradient(135deg, var(--blue) 0%, #1D4ED8 100%); color:#fff;
+  border-radius:16px; padding:22px 26px; display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:20px; box-shadow:0 8px 20px rgba(37,99,235,0.2);
+}
+.welcome-bar h2 {font-size:20px; font-weight:800;}
+.welcome-bar p {font-size:13px; opacity:0.85; margin-top:2px;}
+.wb-time {font-size:24px; font-weight:800; font-family:var(--mono);}
+
+.kpi-grid {display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px;}
+.kpi-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 20px;
+  box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:4px;
+}
+.kpi-num {font-size:28px; font-weight:800; font-family:var(--mono); line-height:1;}
+.kpi-label {font-size:12px; font-weight:700; color:var(--text2);}
+
+/* MULTI-FILTER BAR */
+.filter-bar {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:14px;
+  padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:14px;
+}
+.f-chip {
+  padding:6px 12px; border-radius:20px; font-size:11.5px; font-weight:700; cursor:pointer;
+  border:1.5px solid var(--border); background:var(--surface); color:var(--text2);
+  transition:all 0.15s; user-select:none; display:inline-flex; align-items:center; gap:4px;
+}
+.f-chip:hover {border-color:var(--blue); color:var(--blue);}
+.f-chip.on {background:var(--blue-light); border-color:var(--blue); color:var(--blue);}
+
+/* TICKETS TABLE */
+.tbl-wrap {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  box-shadow:var(--shadow-sm); overflow:hidden;
+}
+table {width:100%; border-collapse:collapse; text-align:left;}
+th {
+  background:var(--surface2); padding:12px 16px; font-size:11px; font-weight:800;
+  color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border);
+}
+td {padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle;}
+.trow {cursor:pointer; transition:background 0.15s;}
+.trow:hover {background:var(--blue-light);}
+.td-id {font-family:var(--mono); font-weight:800; color:var(--blue);}
+.td-name {font-weight:700; color:var(--text);}
+.td-query {color:var(--text2); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+.pill {display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:3px 9px; border-radius:12px; text-transform:uppercase;}
+.pill.open {background:var(--red-light); color:var(--red-text); border:1px solid var(--red-subtle);}
+.pill.closed {background:var(--surface2); color:var(--text2); border:1px solid var(--border);}
+.pill.dept {background:var(--blue-light); color:var(--blue); border:1px solid var(--blue-mid);}
+
+/* REMARK LOG SCROLLABLE CELL IN TABLE */
+.remark-cell {
+  max-height:82px; overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:6px;
+  font-size:11.5px; line-height:1.35;
+}
+.remark-cell::-webkit-scrollbar {width:4px;}
+.remark-cell::-webkit-scrollbar-thumb {background:var(--blue-mid); border-radius:4px;}
+.remark-entry {background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:5px 8px;}
+.remark-meta {font-size:10px; font-weight:700; color:var(--blue); margin-bottom:2px;}
+
+/* ── PAGE 2: PERFORMANCE DASHBOARD CSS ── */
+.perf-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start;}
+.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow-sm);}
+.perf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.perf-title{font-size:15px;font-weight:800;}
+.legend{display:flex;align-items:center;gap:16px;font-size:12px;font-weight:700;}
+.leg-item{display:flex;align-items:center;gap:6px;}
+.dot{width:10px;height:10px;border-radius:3px;}
+
+.dept-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;
+  transition:all .15s;
+}
+.dept-row:hover{border-color:var(--blue-mid);background:#fff;}
+.dept-icon{width:32px;height:32px;border-radius:8px;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;}
+.dept-info{width:110px;flex-shrink:0;}
+.dept-name{font-size:13px;font-weight:800;color:var(--text);}
+.dept-sub{font-size:11px;color:var(--text3);}
+
+.bar-container{flex:1;display:flex;height:14px;border-radius:7px;overflow:hidden;background:#F1F5F9;}
+.seg{height:100%;transition:width .3s;}
+.seg.green{background:var(--green-subtle);}
+.seg.red{background:var(--red-subtle);}
+.seg.gray{background:var(--neutral);}
+
+.dept-count{width:36px;text-align:right;font-size:14px;font-weight:800;font-family:var(--mono);flex-shrink:0;}
+.chev{transition:transform .2s;color:var(--text3);}
+
+.exec-wrap{display:none;margin:-4px 0 10px 24px;padding-left:14px;border-left:2px solid var(--blue-mid);}
+.exec-row{
+  display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:8px;margin-bottom:6px;
+}
+.exec-av{width:26px;height:26px;border-radius:50%;background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.side-panel{display:flex;flex-direction:column;gap:18px;}
+.side-widget{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);}
+.widget-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+
+.vis-item{margin-bottom:12px;}
+.vis-item:last-child{margin-bottom:0;}
+.vis-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;}
+.vis-name{color:var(--text);}
+.vis-val{font-family:var(--mono);font-weight:800;}
+.vis-track{height:10px;background:var(--surface2);border-radius:5px;overflow:hidden;}
+.vis-fill{height:100%;border-radius:5px;transition:width .3s;}
+
+/* ── PAGE 3 & 4: 2-PANE EMBEDDED TICKET PAGES ── */
+#pageDetail, #pageNewTicketPane {
+  display: none;
+}
+#pageDetail.active, #pageNewTicketPane.active {
+  display: block;
+}
+.detail-grid {
+  display:grid; grid-template-columns:460px 1fr; gap:20px; align-items:stretch;
+  min-height: calc(100vh - 210px);
+}
+.detail-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;
+  justify-content:space-between; min-height: calc(100vh - 210px); box-sizing:border-box;
+}
+
+.party-header-card {
+  background:linear-gradient(135deg,var(--blue-light) 0%,#F0F7FF 100%);
+  border:1.5px solid var(--blue-mid); border-radius:14px; padding:16px; margin-bottom:14px;
+}
+.btn-microsip-call {
+  width:100%; margin-top:10px; background:linear-gradient(135deg,#16A34A 0%,#15803D 100%);
+  color:#fff; border:none; border-radius:10px; padding:10px 14px; font-weight:800; font-size:13.5px;
+  display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+  box-shadow:0 4px 12px rgba(22,163,74,.25); transition:all .2s; text-decoration:none;
+}
+.btn-microsip-call:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(22,163,74,.35);}
+
+/* STATUS RADIO PILLS */
+.status-pill-grid {display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+.status-radio-pill {
+  display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px;
+  border:1.5px solid var(--border); font-size:12px; font-weight:700; cursor:pointer;
+  background:var(--surface); color:var(--text2); user-select:none; transition:all .2s;
+  box-shadow:var(--shadow-sm); opacity:0.8;
+}
+.status-radio-pill:hover {border-color:var(--blue); color:var(--blue); opacity:1; transform:translateY(-1px);}
+
+/* SOLID DARK BLUE ACTIVE/SELECTED STATE WITH OUTER GLOW RING */
+.status-radio-pill.selected {
+  background:#1E40AF !important; color:#ffffff !important; font-weight:800 !important;
+  border-color:#1E40AF !important; box-shadow:0 0 0 3.5px rgba(30,64,175,0.4), 0 4px 12px rgba(30,64,175,0.3) !important;
+  transform:scale(1.05) !important; opacity:1 !important;
+}
+.status-radio-pill.selected.internal-verif {
+  background:#D97706 !important; border-color:#D97706 !important; box-shadow:0 0 0 3.5px rgba(217,119,6,0.35), 0 4px 12px rgba(217,119,6,0.3) !important;
+}
+.status-radio-pill.selected.api-issue {
+  background:#DC2626 !important; border-color:#DC2626 !important; box-shadow:0 0 0 3.5px rgba(220,38,38,0.35), 0 4px 12px rgba(220,38,38,0.3) !important;
+}
+.status-radio-pill.selected.meeting-disc {
+  background:#4F46E5 !important; border-color:#4F46E5 !important; box-shadow:0 0 0 3.5px rgba(79,70,229,0.35), 0 4px 12px rgba(79,70,229,0.3) !important;
+}
+.status-radio-pill.selected.solved-closed {
+  background:#16A34A !important; border-color:#16A34A !important; box-shadow:0 0 0 3.5px rgba(22,163,74,0.35), 0 4px 12px rgba(22,163,74,0.3) !important;
+}
+
+/* ONLY SCROLL IN ACTIVITY REMARKS BOX */
+.timeline-scroll-box {
+  flex:1; min-height:280px; max-height:440px; overflow-y:auto; padding-right:6px;
+  display:flex; flex-direction:column; gap:10px; margin-bottom:10px;
+}
+.timeline-scroll-box::-webkit-scrollbar {width:6px;}
+.timeline-scroll-box::-webkit-scrollbar-track {background:var(--surface2); border-radius:4px;}
+.timeline-scroll-box::-webkit-scrollbar-thumb {background:var(--blue-mid); border-radius:4px;}
+
+/* BOTTOM DOCK BAR */
+#bottomDock {
+  position:fixed; bottom:0; left:240px; right:0; height:48px; background:var(--surface);
+  border-top:1.5px solid var(--border); padding:0 20px; display:none; align-items:center;
+  gap:10px; z-index:90; box-shadow:0 -4px 12px rgba(0,0,0,0.05); overflow-x:auto;
+}
+#bottomDock.active {display:flex;}
+.dock-item {
+  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer;
+  border:1.5px solid var(--border); background:var(--surface2); color:var(--text2);
+  display:flex; align-items:center; gap:8px; white-space:nowrap; transition:all 0.15s;
+}
+.dock-item:hover {border-color:var(--blue); color:var(--blue);}
+.dock-item.active {background:var(--blue-light); border-color:var(--blue); color:var(--blue);}
+.dock-close {font-size:11px; opacity:0.6; padding:2px 4px; border-radius:50%;}
+.dock-close:hover {opacity:1; background:var(--red-light); color:var(--red-text);}
+
+/* FORM CONTROLS */
+.fl {display:flex; flex-direction:column; gap:4px; margin-bottom:12px;}
+.fl label {font-size:11px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:0.4px;}
+.fi {
+  width:100%; background:var(--surface); border:1.5px solid var(--border); border-radius:8px;
+  padding:9px 12px; font-family:var(--font); font-size:13px; color:var(--text); outline:none; transition:all 0.15s;
+}
+.fi:focus {border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+
+/* MODALS */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(15,23,42,0.5); backdrop-filter:blur(4px);
+  z-index:300; display:none; align-items:center; justify-content:center; overflow-y:auto !important; padding:30px 12px;
+}
+.modal-overlay.active {display:flex;}
+.modal-card {
+  background:var(--surface); border-radius:20px; padding:28px; width:720px; max-width:94vw;
+  box-shadow:var(--shadow-lg); border:1px solid var(--border); max-height:85vh; overflow-y:auto;
+}
+
+/* TOASTS */
+#toastContainer {position:fixed; bottom:60px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px;}
+.toast {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:12px 16px;
+  box-shadow:var(--shadow-md); display:flex; align-items:center; gap:10px; font-weight:700; font-size:13px;
+  animation:toastIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes toastIn {from{transform:translateY(20px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+
+/* FILTER CHIPS */
+.filter-bar {
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+  padding:10px 16px; background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; margin-bottom:12px;
+}
+.f-chip {
+  display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border-radius:20px;
+  font-size:12px; font-weight:700; cursor:pointer; user-select:none;
+  border:1.5px solid var(--border); background:var(--surface2); color:var(--text2);
+  transition:all 0.15s; white-space:nowrap;
+}
+.f-chip:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
+.f-chip.on {
+  background:var(--blue-light); border-color:var(--blue); color:var(--blue);
+}
+.f-chip.on::before { content:"✓ "; font-weight:900; }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- LOGIN SCREEN -->
+<div class="screen active" id="screenLogin">
+  <div class="login-card">
+    <div class="login-logo">O</div>
+    <h2 style="font-size:22px; font-weight:800; margin-bottom:4px;">Ornate Std Support</h2>
+    <p style="color:var(--text3); font-size:13px; margin-bottom:24px;">Executive Support Ticketing Dashboard v5.2</p>
+
+    <div class="fl">
+      <label>Executive Username *</label>
+      <input type="text" class="fi" id="loginUsernameInput" placeholder="Enter username (e.g. Malay, Purvi, Sanjay)" value="" onkeydown="if(event.key==='Enter') performLogin()">
+    </div>
+    <div class="fl">
+      <label>Password *</label>
+      <input type="password" class="fi" id="loginPasswordInput" placeholder="Enter password" value="" onkeydown="if(event.key==='Enter') performLogin()">
+    </div>
+
+    <button class="btn-new-ticket" style="width:100%; justify-content:center; padding:12px; margin-top:8px;" id="loginBtn" onclick="performLogin()">
+      <span id="loginBtnLabel">Sign In to Dashboard →</span>
+      <span id="loginBtnSpinner" style="display:none;">⏳ Signing in...</span>
+    </button>
+  </div>
+</div>
+
+<!-- APP MAIN SCREEN -->
+<div class="screen" id="screenApp">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">O</div>
+      <div>
+        <div style="font-weight:800; font-size:15px;">Ornate Std</div>
+        <div style="font-size:11px; color:var(--text3); font-weight:600;">Support Dashboard v5.2</div>
+      </div>
+    </div>
+
+    <div class="sb-nav-section">MAIN</div>
+    <div class="sb-item active" id="sb-nav-tickets" onclick="switchPage('tickets')">
+      <span>📊</span> All Support Tickets
+    </div>
+    <div class="sb-item" id="sb-nav-perf" onclick="switchPage('perf')">
+      <span>📈</span> Performance Dashboard
+    </div>
+
+    <div class="sb-nav-section" id="sb-section-admin" style="display:none;">ADMIN MANAGEMENT</div>
+    <div class="sb-item" id="sb-nav-settings" style="display:none;" onclick="openSettingsModal()">
+      <span>⚙️</span> System Settings & Values
+    </div>
+    <div class="sb-item" id="sb-nav-users" style="display:none;" onclick="openManageUsersModal()">
+      <span>👤</span> Manage Executive Users
+    </div>
+
+    <div class="sb-user">
+      <div class="sb-avatar" id="sbAvatar">M</div>
+      <div>
+        <div style="font-size:12px; font-weight:800;" id="sbUserName">Malay</div>
+        <div style="font-size:10px; color:var(--blue); font-weight:700;" id="sbUserRole">Super Admin</div>
+      </div>
+    </div>
+
+    <div class="sb-logout" onclick="performLogout()">
+      <span>🚪</span> Log Out
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="main" id="mainContainer">
+    <div class="header-bar">
+      <div>
+        <div class="header-title" id="pageHeaderTitle">📊 All Support Tickets</div>
+        <div class="header-sub" id="pageHeaderSub">Live ticket queue with latest remark log history</div>
+      </div>
+
+      <div class="header-actions">
+        <!-- SHORTCUT BADGE LOG NEW TICKET BUTTON -->
+        <button class="btn-new-ticket" onclick="openNewTicketAndDock()" title="Keyboard Shortcut: Alt + A or F3">
+          <span>➕ Log New Ticket</span>
+          <kbd style="font-size:10px; opacity:0.85; background:rgba(255,255,255,0.2); padding:1px 5px; border-radius:4px; margin-left:6px; font-weight:600; font-family:inherit;">Alt+A</kbd>
+        </button>
+
+        <button id="btnRefreshData" style="padding:8px 14px; background:var(--blue-light); color:var(--blue); border:1.5px solid var(--blue-mid); border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;" onclick="syncData(true)">
+          <span id="refreshSpinIcon" style="display:inline-block;">🔄</span> Refresh Data
+        </button>
+
+        <!-- UNIVERSAL SEARCH BOX IN TOP RIGHT CORNER (ALT + F) -->
+        <div style="position:relative; width:280px;">
+          <input type="text" class="fi" id="universalSearchInput" placeholder="🔍 Search party, phone, ticket #... (Alt+F)" title="Keyboard Shortcut: Alt + F" style="padding-left:14px; padding-right:12px; height:38px; font-size:13px; border-radius:10px; background:var(--surface);" oninput="performUniversalSearch(this.value)">
+        </div>
+
+        <!-- REAL-TIME DYNAMIC IN-APP NOTIFICATION BELL -->
+        <div class="top-icon-btn" onclick="toggleNotifPanel(event)">
+          <span>🔔</span>
+          <div class="notif-badge" id="notifBadgeCount" style="display:none;">0</div>
+        </div>
+
+        <div class="notif-panel" id="notifPanel" onclick="event.stopPropagation()">
+          <div class="np-header">
+            <div class="np-title">In-App Notifications</div>
+            <span class="np-clear" onclick="clearAllNotifications(event)">Clear All</span>
+          </div>
+          <div class="np-body" id="notifListBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 1: TICKETS DASHBOARD -->
+    <div class="page active" id="pageTickets">
+      <div class="welcome-bar">
+        <div class="wb-left">
+          <h2 id="welcomeGreeting">Good Morning, Executive! ☀️</h2>
+          <p>Here is your live ticket status for today.</p>
+        </div>
+        <div style="text-align:right;">
+          <div class="wb-time" id="timeClock">--:-- --</div>
+          <div style="font-size:11px; opacity:.8;" id="dateToday">--.--.----</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num" id="statCard1Num" style="color:var(--red-text)">0</div>
+          <div class="kpi-label" id="statCard1Label">My Dept Open Jobs</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="statCard2Num" style="color:var(--amber-text)">0</div>
+          <div class="kpi-label">My Pending Follow-Up Today</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="statCard3Num" style="color:var(--blue)">0</div>
+          <div class="kpi-label">Assigned To Me</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="statCard4Num" style="color:var(--green-text)">0</div>
+          <div class="kpi-label">Total Open Tickets</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span style="font-size:12px; font-weight:700; color:var(--text2); margin-right:4px;">Multi-Filters:</span>
+        <div class="f-chip on" id="chip-OPEN" onclick="toggleMultiFilter('OPEN')"><span>🔴 Open</span></div>
+        <div class="f-chip on" id="chip-CLOSED" onclick="toggleMultiFilter('CLOSED')"><span>⚪ Closed</span></div>
+        <div class="f-chip" id="chip-PENDING_TODAY" onclick="toggleMultiFilter('PENDING_TODAY')"><span>⏳ Pending Today</span></div>
+        <div class="f-chip" id="chip-MY_DEPT" onclick="toggleMultiFilter('MY_DEPT')"><span>📁 My Department</span></div>
+        <div class="f-chip" id="chip-MY_ASSIGNED" onclick="toggleMultiFilter('MY_ASSIGNED')"><span>👤 Assigned to Me</span></div>
+        <div class="f-chip" id="chip-UNASSIGNED" onclick="toggleMultiFilter('UNASSIGNED')"><span>❓ Unassigned</span></div>
+        
+        <span style="width:1px; height:20px; background:var(--border); margin:0 4px;"></span>
+        
+        <span style="font-size:12px; font-weight:700; color:var(--text2);">Depts:</span>
+        <div class="f-chip on" id="chip-dept-ALL" onclick="filterByDept('ALL')"><span>🌐 All Depts</span></div>
+        <div class="f-chip" id="chip-dept-OS" onclick="filterByDept('OS')"><span>💻 OS</span></div>
+        <div class="f-chip" id="chip-dept-TOS" onclick="filterByDept('TOS')"><span>🚨 TOS</span></div>
+        <div class="f-chip" id="chip-dept-Format" onclick="filterByDept('Format')"><span>📄 Format</span></div>
+        <div class="f-chip" id="chip-dept-2017" onclick="filterByDept('2017')"><span>🏷️ 2017</span></div>
+
+        <label style="margin-left:auto; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text2); cursor:pointer;">
+          <input type="checkbox" id="chkSearchArchiveSheet" onchange="performUniversalSearch(document.getElementById('universalSearchInput').value)">
+          <span>Search Solved/Closed Archive</span>
+        </label>
+      </div>
+
+      <!-- Tickets Table with Last Follow-up Date Column & Today Badges -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding:0 2px;">
+        <div style="font-size:12px; font-weight:700; color:var(--text2);" id="ticketCountLabel">Loading tickets...</div>
+        <button id="sortToggleBtn" onclick="toggleSort()" style="
+          padding:5px 12px; border-radius:16px; font-size:11.5px; font-weight:800; cursor:pointer;
+          background:var(--surface2); border:1.5px solid var(--border); color:var(--text2);
+          display:flex; align-items:center; gap:5px; transition:all 0.15s;
+        " onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" 
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">↓ Newest First</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortByColumn('jobNo')" style="cursor:pointer;" title="Click to sort by Job No">Job No. <span id="sort-icon-jobNo"></span></th>
+              <th onclick="sortByColumn('date')" style="cursor:pointer;" title="Click to sort by Date">Date <span id="sort-icon-date">▼</span></th>
+              <th onclick="sortByColumn('partyName')" style="cursor:pointer;" title="Click to sort by Party Name">Party Name & Contact <span id="sort-icon-partyName"></span></th>
+              <th onclick="sortByColumn('writtenBy')" style="cursor:pointer;" title="Click to sort by Logged By Executive">Logged By <span id="sort-icon-writtenBy"></span></th>
+              <th onclick="sortByColumn('department')" style="cursor:pointer;" title="Click to sort by Dept">Dept <span id="sort-icon-department"></span></th>
+              <th>Client Query</th>
+              <th onclick="sortByColumn('lastUpdatedDate')" style="cursor:pointer;" title="Click to sort by Follow-up Date">Last Followup Date <span id="sort-icon-lastUpdatedDate"></span></th>
+              <th style="min-width:260px;">📝 Latest Remarks Log (Col L)</th>
+              <th onclick="sortByColumn('status')" style="cursor:pointer;" title="Click to sort by Status">Status <span id="sort-icon-status"></span></th>
+              <th onclick="sortByColumn('resolvedBy')" style="cursor:pointer;" title="Click to sort by Assigned Executive">Assigned To <span id="sort-icon-resolvedBy"></span></th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ticketsTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE 2: FULL RICH PERFORMANCE DASHBOARD UI -->
+    <div class="page" id="pagePerf">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num" id="perfKpiTotalOpen" style="color:var(--blue)">0</div>
+          <div class="kpi-label">Total Open Tickets</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="perfKpiFollowedToday" style="color:var(--green-text)">0</div>
+          <div class="kpi-label">Follow-Up Taken Today</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="perfKpiPendingToday" style="color:var(--red-text)">0</div>
+          <div class="kpi-label">Pending Follow-Up Today</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num" id="perfKpiUnassigned" style="color:var(--amber-text)">0</div>
+          <div class="kpi-label">Unassigned Queue</div>
+        </div>
+      </div>
+
+      <div class="perf-grid">
+        <div class="perf-card">
+          <div class="perf-header">
+            <div class="perf-title">Department & Executive Activity Breakdown</div>
+            <div class="legend">
+              <div class="leg-item"><div class="dot" style="background:var(--green-subtle)"></div> Followed Up Today</div>
+              <div class="leg-item"><div class="dot" style="background:var(--red-subtle)"></div> Pending Follow-Up Today</div>
+              <div class="leg-item"><div class="dot" style="background:var(--neutral)"></div> Unassigned</div>
+            </div>
+          </div>
+          <div id="deptRowsContainer"></div>
+        </div>
+
+        <div class="side-panel">
+          <div class="side-widget">
+            <div class="widget-title">
+              <span>🌐 Open Tickets by Dept</span>
+              <span style="font-size:11px; font-weight:700; color:var(--blue);" id="perfTotalOpenDeptLabel">0 Total</span>
+            </div>
+            <div id="perfOpenByDeptWidgets"></div>
+          </div>
+
+          <div class="side-widget">
+            <div class="widget-title">
+              <span>⏳ Not Followed Up Today by Dept</span>
+              <span style="font-size:11px; font-weight:700; color:var(--red-text);" id="perfPendingDeptLabel">0 Pending</span>
+            </div>
+            <div id="perfPendingByDeptWidgets"></div>
+          </div>
+
+          <!-- WIDGET 3: TOP PERFORMERS OF THE DAY -->
+          <div class="side-widget" style="background:linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border:1.5px solid var(--blue-mid);">
+            <div class="widget-title">
+              <span>🏆 Top Performers of the Day</span>
+              <span style="font-size:11px; font-weight:800; color:var(--blue);" id="perfTopPerformerCountLabel">0 Actions</span>
+            </div>
+            <div id="perfTopPerformersWidget"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: LOG NEW TICKET PANE WITH REAL-TIME DUPLICATE & HISTORY MATCHING -->
+    <div class="page" id="pageNewTicketPane">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; gap:10px;">
+          <button style="padding:8px 14px; background:var(--blue-light); color:var(--blue); border:1.5px solid var(--blue-mid); border-radius:8px; font-weight:800; cursor:pointer;" onclick="switchPage('tickets')">← Back to Ticket Queue</button>
+          <div style="font-size:16px; font-weight:800; display:flex; align-items:center;">➕ Log New Support Ticket (2-Pane View)</div>
+        </div>
+        <button style="padding:8px 14px; background:var(--amber-light); color:var(--amber-text); border:1.5px solid var(--amber); border-radius:8px; font-weight:800; cursor:pointer;" onclick="minimizeCurrentTicketToDock()">📌 Dock / Minimize Draft Ticket</button>
+      </div>
+
+      <div class="detail-grid">
+        <!-- LEFT PANE: INPUT FORM WITH REAL-TIME ONINPUT MATCHING -->
+        <div class="detail-card">
+          <div class="fl"><label>Party Name *</label><input type="text" class="fi" id="paneNewPartyName" placeholder="Enter Party Name..." oninput="checkPaneDuplicates()"></div>
+          <div class="fl"><label>Mobile Number *</label><input type="text" class="fi" id="paneNewMobile" placeholder="Enter Mobile Number..." oninput="checkPaneDuplicates()"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="fl"><label>Department *</label><select class="fi" id="paneNewDept"><option value="OS">OS</option><option value="TOS">TOS</option><option value="Format">Format</option><option value="2017">2017</option></select></div>
+            <div class="fl">
+              <label>Priority Tag / Note</label>
+              <select class="fi" id="paneNewPriorityTag" onchange="toggleCustomPriorityInput(this.value, 'paneNewPriorityCustomInput')">
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="High Priority">High Priority</option>
+                <option value="Tomorrow">Tomorrow</option>
+                <option value="Custom Input...">Custom Input...</option>
+              </select>
+              <input type="text" class="fi" id="paneNewPriorityCustomInput" placeholder="Type custom priority note..." style="display:none; margin-top:6px;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="fl"><label>Input Mode</label><select class="fi" id="paneNewMode"><option value="Helpline" selected>Helpline</option><option value="IVR">IVR</option><option value="Mail">Mail</option><option value="Whatsapp">Whatsapp</option><option value="Mode">Mode</option></select></div>
+            <div class="fl"><label>Assigned Executive</label><select class="fi" id="paneNewAssigned"><option value="Unassigned">-- Unassigned --</option><option value="Malay">Malay</option><option value="Purvi">Purvi Ma'am</option><option value="Sanjay">Sanjaybhai</option><option value="Amita">Amita</option></select></div>
+          </div>
+          <div class="fl"><label>Resolution Status</label><select class="fi" id="paneNewInitialStatus">
+            <option value="">🔴 Blank (Open)</option>
+            <option value="Internal Verification">⚡ Internal Verification</option>
+            <option value="V">✅ V (Verified)</option>
+            <option value="Z">🔒 Z (Zone Close)</option>
+            <option value="Meeting Discussion">💬 Meeting Discussion</option>
+            <option value="Solved">🟢 Solved</option>
+            <option value="Closed">🔒 Closed</option>
+            <option value="Solved + Closed">✅ Solved + Closed</option>
+            <option value="API SERVER ISSUE">🛑 API Server Issue</option>
+          </select></div>
+          <div class="fl"><label>Client Issue Description *</label><textarea class="fi" id="paneNewQuery" placeholder="Describe client issue..." style="min-height:80px;"></textarea></div>
+          <button class="btn-new-ticket" style="width:100%; justify-content:center; margin-top:auto;" onclick="submitPaneNewTicket()">Create & Save Ticket to Sheet →</button>
+        </div>
+
+        <!-- RIGHT PANE: REAL-TIME DUPLICATE & PARTY HISTORY MATCHING INSPECTOR -->
+        <div class="detail-card" style="background:var(--surface2); display:flex; flex-direction:column;">
+          <div style="font-weight:800; font-size:14px; margin-bottom:12px;">Live Matching & History Inspector</div>
+          <div id="paneDupNoticeBox" style="display:none; margin-bottom:12px; flex:1;"></div>
+          <div style="font-size:12px; color:var(--text2); font-weight:700; margin-top:auto;">Type Party Name or Mobile Number on the left to search existing open tickets & past history in real-time.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 4: EMBEDDED TICKET DETAIL PANE (2-PANE VIEW) -->
+    <div class="page" id="pageDetail">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button style="padding:6px 12px; background:var(--blue-light); color:var(--blue); border:1.5px solid var(--blue-mid); border-radius:8px; font-weight:800; cursor:pointer;" onclick="switchPage('tickets')">← Back to Tickets</button>
+          <div style="font-size:16px; font-weight:800;" id="detailJobNoHeader">JULY1105</div>
+          <span class="pill open" id="detailStatusHeader">OPEN</span>
+        </div>
+        <button style="padding:6px 12px; background:var(--blue-light); color:var(--blue); border:1.5px solid var(--blue-mid); border-radius:8px; font-weight:800; cursor:pointer;" onclick="minimizeCurrentTicketToDock()">📌 Dock / Minimize Ticket</button>
+      </div>
+
+      <div class="detail-grid">
+        <!-- LEFT PANE -->
+        <div class="detail-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div class="party-header-card">
+              <div class="fl" style="margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:800; color:var(--blue);">Party Name (Column C)</label>
+                <input type="text" class="fi" id="detailPartyNameInput" placeholder="Enter Party Name..." style="font-weight:800; font-size:14px; background:#fff;">
+              </div>
+              <div class="fl" style="margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:800; color:var(--blue);">Mobile Phone Number</label>
+                <input type="text" class="fi" id="detailPartyPhoneInput" placeholder="Enter Phone Number..." style="font-weight:800; font-size:13px; font-family:var(--mono); background:#fff;" oninput="updateMicroSipBtnFromInput()">
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; align-items:center;">
+                <div>
+                  <label style="font-size:10.5px; font-weight:800; color:var(--blue);">Logged By Executive (Column F)</label>
+                  <select class="fi" id="detailWrittenByInput" style="font-weight:800; font-size:12.5px; background:#fff; padding:6px 8px;">
+                    <option value="User">User</option>
+                    <option value="Amita">Amita</option>
+                    <option value="Avani">Avani</option>
+                    <option value="Dhanvi">Dhanvi</option>
+                    <option value="Dhara">Dhara</option>
+                    <option value="Hiral">Hiral</option>
+                    <option value="Hiren">Hiren</option>
+                    <option value="Krutika">Krutika</option>
+                    <option value="Khyati">Khyati</option>
+                    <option value="Malay">Malay</option>
+                    <option value="Sanjay">Sanjay</option>
+                    <option value="Sanjiv">Sanjiv</option>
+                    <option value="Vaibhav">Vaibhav</option>
+                    <option value="Rajendra">Rajendra</option>
+                    <option value="Dhruva">Dhruva</option>
+                    <option value="Kajal">Kajal</option>
+                    <option value="Ritesh">Ritesh</option>
+                    <option value="Sneha ">Sneha</option>
+                    <option value="Purvi">Purvi</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:10.5px; font-weight:800; color:var(--text2);">Logged Date</label>
+                  <div style="font-size:12px; font-weight:800; color:var(--text); padding:6px 0;" id="detailDateDisplay">--</div>
+                </div>
+              </div>
+              <a href="javascript:void(0)" class="btn-microsip-call" id="btnMicroSipCall" onclick="makeMicroSipCall()" style="margin-top:8px;">📞 Call Now via MicroSIP</a>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="fl"><label>Department / Category *</label><select class="fi" id="detailDept"><option value="OS">OS</option><option value="TOS">TOS</option><option value="Format">Format</option><option value="2017">2017</option></select></div>
+              <div class="fl">
+                <label>Priority Tag / Note (Column I)</label>
+                <select class="fi" id="detailPriorityTag" onchange="toggleCustomPriorityInput(this.value, 'detailPriorityCustomInput')">
+                  <option value="Normal">Normal</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="High Priority">High Priority</option>
+                  <option value="Tomorrow">Tomorrow</option>
+                  <option value="Custom Input...">Custom Input...</option>
+                </select>
+                <input type="text" class="fi" id="detailPriorityCustomInput" placeholder="Type custom priority note..." style="display:none; margin-top:6px;">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="fl"><label>Input Mode</label><select class="fi" id="detailMode"><option value="Helpline">Helpline</option><option value="IVR">IVR</option><option value="Mail">Mail</option><option value="Whatsapp">Whatsapp</option><option value="Mode">Mode</option></select></div>
+              <div class="fl"><label>Assigned Executive</label><select class="fi" id="detailAssigned"><option value="Unassigned">-- Unassigned --</option><option value="Malay">Malay</option><option value="Purvi">Purvi Ma'am</option><option value="Sanjay">Sanjaybhai</option><option value="Amita">Amita</option></select></div>
+            </div>
+
+            <div class="fl">
+              <label>Update Resolution Status</label>
+              <input type="hidden" id="detailStatusInput" value="">
+              <div class="status-pill-grid" id="detailStatusPillGrid">
+                <div class="status-radio-pill selected" onclick="selectStatusPill('', this)">🔴 Blank (Open)</div>
+                <div class="status-radio-pill internal-verif" onclick="selectStatusPill('Internal Verification', this)">⚡ Internal Verification</div>
+                <div class="status-radio-pill solved-closed" onclick="selectStatusPill('V', this)">✅ V (Verified)</div>
+                <div class="status-radio-pill solved-closed" onclick="selectStatusPill('Z', this)">🔒 Z (Zone Close)</div>
+                <div class="status-radio-pill meeting-disc" onclick="selectStatusPill('Meeting Discussion', this)">💬 Meeting Discussion</div>
+                <div class="status-radio-pill solved-closed" onclick="selectStatusPill('Solved', this)">🟢 Solved</div>
+                <div class="status-radio-pill solved-closed" onclick="selectStatusPill('Closed', this)">🔒 Closed</div>
+                <div class="status-radio-pill solved-closed" onclick="selectStatusPill('Solved + Closed', this)">✅ Solved + Closed</div>
+                <div class="status-radio-pill api-issue" onclick="selectStatusPill('API SERVER ISSUE', this)">🛑 API Server Issue</div>
+              </div>
+              <div id="detailSelectedStatusBadge" style="margin-top:8px; font-size:12px; font-weight:700; color:var(--text2);">
+                Active Selected Status: <span id="detailSelectedStatusText" style="font-weight:800; color:var(--blue); font-size:13px; text-decoration:underline;">🔴 Blank (Open)</span>
+              </div>
+            </div>
+
+            <div class="fl"><label>Client Issue Description</label><textarea class="fi" id="detailQuery" style="min-height:70px;"></textarea></div>
+          </div>
+
+          <button class="btn-new-ticket" style="width:100%; justify-content:center; margin-top:16px;" onclick="saveTicketDetailsInstant()">Save Updates to Sheet →</button>
+        </div>
+
+        <!-- RIGHT PANE -->
+        <div class="detail-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; flex-direction:column; flex:1; min-height:0; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="font-weight:800; font-size:14px;">Ticket Activity Log</div>
+              <div style="font-size:11px; font-weight:700; color:var(--blue);">▲ Newest First</div>
+            </div>
+
+            <div class="timeline-scroll-box" id="detailRemarkLogContainer" style="flex:1; min-height:220px; overflow-y:auto;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+            <div class="fl">
+              <label style="font-weight:800; font-size:12px; color:var(--blue);">Write New Remark or Follow-up Note</label>
+              <textarea class="fi" id="newRemarkText" placeholder="Write your remark or follow-up note here..." style="min-height:65px;" onkeydown="if(event.key==='Enter'&&!event.altKey){event.preventDefault(); addRemarkLogInstant();}"></textarea>
+            </div>
+            <button class="btn-new-ticket" style="width:100%; justify-content:center;" onclick="addRemarkLogInstant()">Add Remark →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM DOCK BAR -->
+    <div id="bottomDock">
+      <span style="font-size:11px; font-weight:800; color:var(--text3);">OPEN TABS:</span>
+      <div id="dockTabsList" style="display:flex; align-items:center; gap:8px; overflow-x:auto; flex:1;"></div>
+      <button style="background:none; border:none; color:var(--red-text); font-weight:800; font-size:11.5px; cursor:pointer;" onclick="clearAllDockTabs()">🗑️ Clear Dock / Close All</button>
+    </div>
+  </main>
+</div>
+
+<!-- SYSTEM SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card" style="width:680px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px; flex-shrink:0;">
+      <div style="font-size:16px; font-weight:800;">⚙️ System Settings & Staff Display Name Mapping</div>
+      <span style="cursor:pointer; font-size:18px; font-weight:800;" onclick="closeSettingsModal()">✕</span>
+    </div>
+
+    <div style="overflow-y:auto; flex:1; padding-right:4px;">
+      <div style="font-size:12px; font-weight:800; color:var(--text); margin-bottom:6px;">Department Management</div>
+      <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center;">
+        <input type="text" class="fi" id="newDeptInput" placeholder="Add new department name (e.g. 2017, Hardware)" style="flex:1;">
+        <button style="padding:10px 16px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer; white-space:nowrap;" onclick="addNewDeptFromInput()">➕ Add Dept</button>
+      </div>
+
+      <div style="font-size:12px; font-weight:800; color:var(--text); margin-bottom:6px;">Executive Sheet Username ➔ UI Display Name Mapping</div>
+      <div style="font-size:11px; color:var(--text2); margin-bottom:10px;">Maps Sheet Username (Column K) to Display Name in UI (e.g. Sanjay ➔ Sanjaybhai)</div>
+
+      <div style="max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; margin-bottom:16px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:var(--surface2); position:sticky; top:0; z-index:1;">
+              <th style="padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); font-size:11.5px;">Sheet Username (Col K)</th>
+              <th style="padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); font-size:11.5px;">UI Display Name (App UI)</th>
+            </tr>
+          </thead>
+          <tbody id="userMappingGridBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="padding-top:12px; border-top:1px solid var(--border); flex-shrink:0;">
+      <button class="btn-new-ticket" style="width:100%; justify-content:center;" onclick="saveSettingsModal()">💾 Save System Settings →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE EXECUTIVE USERS MODAL -->
+<div class="modal-overlay" id="manageUsersModal">
+  <div class="modal-card" style="width:800px; max-height:92vh;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+      <div style="font-size:16px; font-weight:800;">👤 Manage Executive Users & Department Rights</div>
+      <span style="cursor:pointer; font-size:18px;" onclick="closeManageUsersModal()">✕</span>
+    </div>
+
+    <div style="font-size:13px; font-weight:800; margin-bottom:6px;">Current Executive Accounts <span id="userCountBadge" style="font-size:11px; background:var(--blue-light); color:var(--blue); padding:2px 8px; border-radius:8px; margin-left:6px;"></span></div>
+    <div style="max-height:260px; overflow-y:auto; margin-bottom:20px; border:1px solid var(--border); border-radius:12px;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--surface2); position:sticky; top:0; z-index:1;">
+            <th style="padding:10px 14px; font-size:11px; font-weight:800; color:var(--text2); text-align:left; border-bottom:1px solid var(--border);">Username</th>
+            <th style="padding:10px 14px; font-size:11px; font-weight:800; color:var(--text2); text-align:left; border-bottom:1px solid var(--border);">Display Name</th>
+            <th style="padding:10px 14px; font-size:11px; font-weight:800; color:var(--text2); text-align:left; border-bottom:1px solid var(--border);">Role</th>
+            <th style="padding:10px 14px; font-size:11px; font-weight:800; color:var(--text2); text-align:left; border-bottom:1px solid var(--border);">Departments</th>
+            <th style="padding:10px 14px; font-size:11px; font-weight:800; color:var(--text2); text-align:left; border-bottom:1px solid var(--border);">Action</th>
+          </tr>
+        </thead>
+        <tbody id="manageUsersTableBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:800;" id="userFormTitle">➕ Add / Edit Executive User & Rights</div>
+        <button style="padding:4px 10px; background:var(--surface); border:1px solid var(--border); border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;" onclick="resetExecutiveForm()">🔄 Reset Form</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div class="fl">
+          <label>Sheet Username *</label>
+          <input type="text" class="fi" id="formUsername" placeholder="e.g. Sanjay">
+        </div>
+        <div class="fl">
+          <label>UI Display Name *</label>
+          <input type="text" class="fi" id="formDisplayName" placeholder="e.g. Sanjaybhai">
+        </div>
+        <div class="fl">
+          <label>Account Password</label>
+          <input type="password" class="fi" id="formPassword" placeholder="Leave blank = keep existing">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:12px; margin-bottom:14px;">
+        <div class="fl">
+          <label>Account Role *</label>
+          <select class="fi" id="formRole">
+            <option value="standard">Executive / Standard User</option>
+            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
+          </select>
+        </div>
+
+        <div class="fl">
+          <label>Assigned Departments *</label>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:var(--surface); border:1.5px solid var(--border); border-radius:8px; padding:10px 14px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer;">
+              <input type="checkbox" id="chkDeptOS"> <span>💻 OS</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer;">
+              <input type="checkbox" id="chkDeptTOS"> <span>🚨 TOS</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer;">
+              <input type="checkbox" id="chkDeptFormat"> <span>📄 Format</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer;">
+              <input type="checkbox" id="chkDept2017"> <span>🏷️ 2017</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-new-ticket" style="width:100%; justify-content:center;" onclick="saveExecutiveUserFromForm()">💾 Save Executive User Account & Rights →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectStatusPill(val, el) {
+  document.getElementById('detailStatusInput').value = val;
+  const pills = document.querySelectorAll('#detailStatusPillGrid .status-radio-pill');
+  pills.forEach(p => p.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+
+  const badgeTextEl = document.getElementById('detailSelectedStatusText');
+  if (badgeTextEl) {
+    badgeTextEl.innerText = el ? el.innerText.trim() : (val || '🔴 Blank (Open)');
+  }
+}
+
+let currentUserObj = { username: '', name: '', role: 'standard', departments: 'OS,TOS,Format,2017' };
+let currentOpenPage = 'tickets';
+let currentOpenJobNo = null;
+
+let activeMultiFilters = {
+  "OPEN": true,
+  "CLOSED": false,
+  "PENDING_TODAY": false,
+  "MY_DEPT": true,
+  "MY_ASSIGNED": false,
+  "UNASSIGNED": false
+};
+let selectedDeptFilter = "ALL";
+let sortColumn = "date"; // default sort column
+let sortAsc = false; // false = newest first (default)
+
+let dockedItems = [];
+let userNotifications = [];
+let shownToastNotifIds = new Set(); // tracks which notifs have already been shown as toast (session only)
+let knownTicketJobNos = new Set(); // tracks tickets seen at last sync — to detect brand new ones
+
+let usersList = [
+  { username: 'Malay', name: 'Malay', role: 'super_admin', departments: 'TOS,OS,Format,2017' },
+  { username: 'Purvi', name: "Purvi Ma'am", role: 'admin', departments: 'OS,TOS,Format,2017' },
+  { username: 'Sanjay', name: 'Sanjaybhai', role: 'admin', departments: 'OS,TOS,Format,2017' },
+  { username: 'Amita', name: 'Amita', role: 'standard', departments: 'OS' },
+  { username: 'Avani', name: 'Avani', role: 'standard', departments: 'OS' },
+  { username: 'Dhanvi', name: 'Dhanvi', role: 'standard', departments: 'Format' },
+  { username: 'Dhara', name: 'Dhara', role: 'standard', departments: 'OS' },
+  { username: 'Hiral', name: 'Hiral', role: 'standard', departments: 'OS' },
+  { username: 'Hiren', name: 'Hiren', role: 'standard', departments: 'OS' },
+  { username: 'Krutika', name: 'Krutika', role: 'standard', departments: 'Format' },
+  { username: 'Khyati', name: 'Khyati', role: 'standard', departments: 'OS' },
+  { username: 'Sanjiv', name: 'Sanjiv', role: 'standard', departments: 'OS' },
+  { username: 'Vaibhav', name: 'Vaibhav', role: 'standard', departments: 'OS' },
+  { username: 'Rajendra', name: 'Rajendra', role: 'standard', departments: 'OS,TOS' },
+  { username: 'Dhruva', name: 'Dhruva', role: 'standard', departments: 'OS' },
+  { username: 'Kajal', name: 'Kajal', role: 'standard', departments: 'OS' },
+  { username: 'Ritesh', name: 'Ritesh', role: 'standard', departments: 'Format' },
+  { username: 'Sneha', name: 'Sneha', role: 'standard', departments: 'OS' }
+];
+
+let ticketsData = [
+  {
+    jobNo: 'July1361', partyName: 'laksh gold', phone: '9909267596', date: '29.07.2026', department: 'TOS', priority: 'Urgent',
+    query: 'reinstallation of os', place: 'N/A', mode: 'Helpline (Avani)', writtenBy: 'Avani', resolvedBy: 'Malay',
+    status: 'Open', isOpen: true, updatedToday: true, lastUpdatedDate: '29.07.2026',
+    remark: '29.07.2026 - Malay (02:15 PM) - taken time check the process minutes and call me back for further guidance'
+  },
+  {
+    jobNo: 'JULY1105', partyName: 'Suvarna Sangam Jewellers', phone: '08866181126', date: '23.07.2026', department: 'TOS', priority: 'Urgent',
+    query: 'Weight scale is not working', place: 'N/A', mode: 'Helpline (Rajendra)', writtenBy: 'Rajendra', resolvedBy: 'Malay',
+    status: 'Open', isOpen: true, updatedToday: true, lastUpdatedDate: '29.07.2026',
+    remark: '29.07.2026 - Malay (12:56 PM) - called but still client was not able to contact hardware vendor\n28.07.2026 - Malay (03:26 PM) - not answering\n27.07.2026 - Malay (12:09 PM) - Weight scale setup issue waiting for vendor call'
+  },
+  {
+    jobNo: 'JUN1059', partyName: 'Radhe Manufacturing', phone: '9427085023', date: '25.06.2026', department: 'OS', priority: 'Normal',
+    query: 'Party wise profit show related session query', place: 'Ahmedabad', mode: 'Helpline (Rajendra)', writtenBy: 'Rajendra', resolvedBy: 'Rajendra',
+    status: 'Open', isOpen: true, updatedToday: true, lastUpdatedDate: '29.07.2026',
+    remark: '29.07.2026 - Rajendra (10:15 AM) - Sent modified report template via Email.\n28.07.2026 - Rajendra (02:30 PM) - Discussed column alignment requirement.'
+  },
+  {
+    jobNo: 'JULY1216', partyName: 'MAROTHI JEWELLERS', phone: '7869550533', date: '27.07.2026', department: 'TOS', priority: 'Tomorrow',
+    query: 'wp automatically remove need to connect daily want to know that reason', place: 'Surat', mode: 'Helpline (Malay)', writtenBy: 'Malay', resolvedBy: 'Malay',
+    status: 'Open', isOpen: true, updatedToday: true, lastUpdatedDate: '29.07.2026',
+    remark: '29.07.2026 - Malay (11:00 AM) - Checked WhatsApp session settings. Fixed auto-disconnect interval.'
+  },
+  {
+    jobNo: 'July1354', partyName: 'YESHA GOLD JEWELLERY', phone: '9879515672', date: '28.07.2026', department: 'TOS', priority: 'High Priority',
+    query: 'Still System Working Slow > i7 / 16gb Ram / 500 gb HDD', place: 'Rajkot', mode: 'Helpline (Purvi)', writtenBy: 'Purvi', resolvedBy: 'Unassigned',
+    status: 'Open', isOpen: true, updatedToday: false, lastUpdatedDate: '28.07.2026',
+    remark: '28.07.2026 - Purvi (09:45 AM) - System specs verified. Database indexing task scheduled.'
+  }
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  startClock();
+  renderStats();
+  renderTicketsTable();
+  renderPerformanceDashboard();
+  generateNotifications();
+  syncData();
+  setInterval(() => syncData(false), 15000);
+
+  // Global Keyboard Shortcuts
+  document.addEventListener("keydown", (e) => {
+    if ((e.altKey && (e.key === 'a' || e.key === 'A')) || e.key === 'F3') {
+      e.preventDefault();
+      openNewTicketAndDock();
+    }
+    else if ((e.altKey && (e.key === 's' || e.key === 'S')) || e.key === 'F2') {
+      e.preventDefault();
+      if (currentOpenPage === 'detail') saveTicketDetailsInstant();
+      else if (currentOpenPage === 'newTicketPane') submitPaneNewTicket();
+    }
+    else if ((e.altKey && (e.key === 'c' || e.key === 'C')) || e.key === 'F1' || e.key === 'F4') {
+      e.preventDefault();
+      if (currentOpenPage === 'detail') makeMicroSipCall();
+    }
+    else if (e.altKey && (e.key === 'f' || e.key === 'F')) {
+      e.preventDefault();
+      const input = document.getElementById("universalSearchInput");
+      if (input) {
+        input.focus();
+        input.select();
+        showBottomRightToast('Universal Search Active', 'Type to search party, phone, or ticket #');
+      }
+    }
+    else if (e.key === 'Escape') {
+      if (currentOpenPage === 'detail' || currentOpenPage === 'newTicketPane') {
+        e.preventDefault();
+        minimizeCurrentTicketToDock();
+      }
+    }
+  });
+
+  document.addEventListener("click", () => {
+    const p = document.getElementById("notifPanel");
+    if (p) p.classList.remove("active");
+  });
+});
+
+function startClock() {
+  const updateClock = () => {
+    const now = new Date();
+    let hrs = now.getHours();
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hrs >= 12 ? 'PM' : 'AM';
+    hrs = hrs % 12 || 12;
+    document.getElementById("timeClock").innerText = `${String(hrs).padStart(2, '0')}:${mins} ${ampm}`;
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    document.getElementById("dateToday").innerText = `${d}.${m}.${now.getFullYear()}`;
+  };
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
+function normalizeDept(rawStr) {
+  if (!rawStr) return "OS";
+  const firstLine = String(rawStr).split('\n')[0].trim().toUpperCase();
+  if (firstLine.includes("FORMAT OS")) return "Format";
+  if (firstLine.includes("OS FORMAT")) return "OS";
+  if (firstLine.includes("TOS")) return "TOS";
+  if (firstLine.includes("2017")) return "2017";
+  if (firstLine.includes("FORMAT")) return "Format";
+  if (firstLine === "OS" || firstLine.startsWith("OS ") || firstLine.startsWith("OS/")) return "OS";
+  if (firstLine.includes("OS")) return "OS";
+  return String(rawStr).trim();
+}
+
+function matchUserDepartment(userDeptsStr, ticketDeptStr) {
+  if (!userDeptsStr || !ticketDeptStr) return false;
+  const normTicketDept = normalizeDept(ticketDeptStr).toUpperCase();
+  const userDepts = String(userDeptsStr).split(",").map(d => d.trim().toUpperCase()).filter(Boolean);
+  return userDepts.includes(normTicketDept);
+}
+
+function checkPaneDuplicates() {
+  const pName = document.getElementById("paneNewPartyName").value.toLowerCase().trim();
+  const pPhone = document.getElementById("paneNewMobile").value.toLowerCase().trim();
+  const noticeBox = document.getElementById("paneDupNoticeBox");
+
+  const validName = pName.length >= 2;
+  const validPhone = pPhone.length >= 4;
+
+  if (!validName && !validPhone) {
+    noticeBox.style.display = "none";
+    noticeBox.innerHTML = "";
+    return;
+  }
+
+  // STRICT FILTERING: Search ONLY Client Party Name and Client Mobile Phone Number.
+  // Exclude executive names (resolvedBy/writtenBy) and remark text completely.
+  const matches = ticketsData.filter(t => {
+    const clientPartyName = String(t.partyName || "").toLowerCase();
+    const clientPhone = String(t.phone || extractPhone(t.partyName) || "").toLowerCase();
+
+    const nameMatch = validName && clientPartyName.includes(pName);
+    const phoneMatch = validPhone && clientPhone.includes(pPhone);
+
+    return nameMatch || phoneMatch;
+  });
+
+  const openMatch = matches.find(t => t.isOpen);
+
+  if (matches.length > 0) {
+    noticeBox.style.display = "block";
+    let html = "";
+
+    if (openMatch) {
+      html += `
+        <div style="background:var(--amber-light); border:1.5px solid var(--amber); border-radius:10px; padding:12px; margin-bottom:10px; color:var(--amber-text);">
+          <div style="font-weight:800; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <span>⚠️</span> Duplicate Open Ticket Found!
+          </div>
+          <div style="margin-top:6px; font-size:12px; line-height:1.4;">
+            <b>${escapeHtml(openMatch.partyName)}</b> already has an <b>OPEN</b> ticket <b>${openMatch.jobNo} (${openMatch.department})</b> assigned to ${escapeHtml(openMatch.resolvedBy || 'Unassigned')}.
+          </div>
+          <button style="margin-top:10px; width:100%; background:var(--amber); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-weight:800; cursor:pointer;" onclick="openTicketDetailAndDock('${openMatch.jobNo}')">
+            👁️ View Open Ticket ${openMatch.jobNo} (Keep Draft Intact)
+          </button>
+        </div>
+      `;
+    }
+
+    html += `
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px;">
+        <div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:10px;">📜 Recent Party Ticket History (${matches.length} matches)</div>
+        <div style="display:flex; flex-direction:column; gap:8px; max-height:380px; overflow-y:auto; padding-right:4px;">
+          ${matches.map(m => `
+            <div style="font-size:12px; padding:10px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; cursor:pointer;" onclick="openTicketDetailAndDock('${m.jobNo}')">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0; overflow:hidden;">
+                  <span style="font-weight:800; color:var(--blue); font-size:12px; font-family:var(--mono);">${m.jobNo}</span>
+                  <span style="font-weight:800; color:var(--text); font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.partyName)}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                  <span class="pill ${m.isOpen ? 'open' : 'closed'}" style="font-size:9.5px;">${m.isOpen ? 'OPEN' : escapeHtml(m.status)}</span>
+                  <button style="font-size:10.5px; background:var(--blue-light); color:var(--blue); border:1.5px solid var(--blue-mid); border-radius:6px; padding:4px 9px; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); autoFillPartyDetailsFromHistory('${m.jobNo}')">📋 Use Party Details</button>
+                </div>
+              </div>
+              <div style="color:var(--text2); font-size:11.5px; line-height:1.35; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                ${escapeHtml(m.query || 'No query specified')}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+
+    noticeBox.innerHTML = html;
+  } else {
+    noticeBox.style.display = "none";
+    noticeBox.innerHTML = "";
+  }
+}
+
+function autoFillPartyDetailsFromHistory(jobNo) {
+  const t = ticketsData.find(x => x.jobNo === jobNo);
+  if (!t) return;
+
+  const phone = t.phone || extractPhone(t.partyName) || '';
+  let partyNameOnly = t.partyName || '';
+  if (phone) {
+    partyNameOnly = partyNameOnly.replace(phone, '').trim();
+  }
+
+  document.getElementById("paneNewPartyName").value = partyNameOnly;
+  document.getElementById("paneNewMobile").value = phone;
+  showBottomRightToast('Details Auto-Filled 📋', `Party info loaded from ${jobNo}!`);
+  checkPaneDuplicates();
+}
+
+function formatJobNo(val) {
+  if (!val) return "";
+  if (val instanceof Date) {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const m = monthNames[val.getMonth()];
+    const yr = val.getFullYear();
+    return `${m}${yr}`;
+  }
+  const str = String(val).trim();
+  if (str.includes("GMT") || str.includes("Standard Time")) {
+    const match = str.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|July|Aug|Sep|Oct|Nov|Dec)\s+\d+\s+(\d+)/i);
+    if (match) {
+      return `${match[1]}${match[2]}`;
+    }
+  }
+  return str;
+}
+
+let isNotificationsCleared = false;
+let dismissedNotifIds = new Set(); // loaded from localStorage — persists across sessions
+
+/* ── DISMISSED NOTIF PERSISTENCE (localStorage per user) ── */
+function getDismissedKey(username) {
+  return `ornate_dismissed_${(username || 'default').toLowerCase()}`;
+}
+function loadDismissedIds(username) {
+  try {
+    const raw = localStorage.getItem(getDismissedKey(username));
+    if (raw) dismissedNotifIds = new Set(JSON.parse(raw));
+    else dismissedNotifIds = new Set();
+  } catch(e) { dismissedNotifIds = new Set(); }
+}
+function saveDismissedIds(username) {
+  try {
+    const key = getDismissedKey(username || currentUserObj.username);
+    localStorage.setItem(key, JSON.stringify([...dismissedNotifIds]));
+  } catch(e) {}
+}
+
+/* ── DYNAMIC IN-APP NOTIFICATIONS SYSTEM ── */
+function generateNotifications() {
+  if (isNotificationsCleared) {
+    renderNotifications();
+    return;
+  }
+
+  const uName = (currentUserObj.username || '').toLowerCase();
+  const uNameDisplay = (currentUserObj.name || currentUserObj.username || '').toLowerCase();
+  const uDepts = (currentUserObj.departments || 'OS,TOS,Format,2017').split(',').map(d => d.trim().toUpperCase());
+
+  const openTickets = ticketsData.filter(t => t.isOpen);
+  const newNotifs = [];
+
+  openTickets.forEach(t => {
+    const tDept = normalizeDept(t.department).toUpperCase();
+    const tAssigned = (t.resolvedBy || '').toLowerCase();
+    const tDeptMatch = uDepts.includes(tDept);
+    const tAssignedToMe = (tAssigned === uName || tAssigned === uNameDisplay);
+
+    // 1. Urgent tickets in my department (not already dismissed)
+    const urgId = `notif-urg-${t.jobNo}`;
+    if (tDeptMatch && !dismissedNotifIds.has(urgId) && t.priority &&
+        (t.priority.toLowerCase().includes('urgent') || t.priority.toLowerCase().includes('high'))) {
+      newNotifs.push({ id: urgId, jobNo: t.jobNo,
+        title: `🔥 Urgent — ${tDept}`,
+        sub: `${t.partyName} | ${(t.query||'').substring(0,60)}`,
+        time: t.lastUpdatedDate || t.date });
+    }
+
+    // 2. Tickets assigned to me with no follow-up (not already dismissed)
+    const mineId = `notif-mine-${t.jobNo}`;
+    if (tAssignedToMe && !dismissedNotifIds.has(mineId) && !isFollowupTakenToday(t)) {
+      newNotifs.push({ id: mineId, jobNo: t.jobNo,
+        title: `👤 Assigned To You — Follow-up Needed`,
+        sub: `${t.partyName} | ${(t.query||'').substring(0,60)}`,
+        time: t.lastUpdatedDate || t.date });
+    }
+  });
+
+  // 3. Dept-level pending summary
+  const myDeptPending = openTickets.filter(t => {
+    const tDept = normalizeDept(t.department).toUpperCase();
+    return uDepts.includes(tDept) && !isFollowupTakenToday(t);
+  });
+
+  const summaryId = `notif-dept-pending-${uDepts.join('-')}`;
+  if (myDeptPending.length > 0 && !dismissedNotifIds.has(summaryId)) {
+    newNotifs.push({
+      id: summaryId,
+      jobNo: myDeptPending[0].jobNo,
+      title: `⏳ ${myDeptPending.length} Ticket${myDeptPending.length > 1 ? 's' : ''} Need Follow-up`,
+      sub: `In your department${uDepts.length > 1 ? 's' : ''}: ${uDepts.join(', ')}`,
+      time: 'Today'
+    });
+  }
+
+  userNotifications = newNotifs;
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const badge = document.getElementById("notifBadgeCount");
+  const container = document.getElementById("notifListBody");
+
+  if (userNotifications.length > 0) {
+    badge.innerText = userNotifications.length;
+    badge.style.display = "block";
+    container.innerHTML = userNotifications.map(n => `
+      <div class="np-item" onclick="openNotifTicket('${n.jobNo}')">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:800; font-size:12.5px; color:var(--text);">${escapeHtml(n.title)}</span>
+          <span style="font-size:10px; color:var(--blue); font-family:var(--mono); font-weight:800;">${n.jobNo}</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--text2); margin-top:2px;">${escapeHtml(n.sub)}</div>
+        <div class="np-item-time">${escapeHtml(n.time)}</div>
+      </div>
+    `).join("");
+  } else {
+    badge.style.display = "none";
+    container.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text3); font-size:12px; font-style:italic;">No unread notifications</div>`;
+  }
+}
+
+function clearAllNotifications(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  // Save ALL currently visible notification IDs to localStorage so they never reappear
+  userNotifications.forEach(n => dismissedNotifIds.add(n.id));
+  saveDismissedIds();
+  isNotificationsCleared = true;
+  userNotifications = [];
+  renderNotifications();
+  const panel = document.getElementById("notifPanel");
+  if (panel) panel.classList.remove("active");
+  showBottomRightToast("✅ Notifications Cleared", "Dismissed. Only brand new notifications will appear.");
+}
+
+function openNotifTicket(jobNo) {
+  document.getElementById("notifPanel").classList.remove("active");
+  openTicketDetailAndDock(jobNo);
+}
+
+function performLogin() {
+  const u = document.getElementById("loginUsernameInput").value.trim();
+  const p = document.getElementById("loginPasswordInput").value.trim();
+  if (!u) { showBottomRightToast('Login Error', 'Please enter your Executive Username!'); return; }
+  if (!p) { showBottomRightToast('Login Error', 'Please enter your Password!'); return; }
+
+  // Show loading state on button
+  const btn = document.getElementById('loginBtn');
+  const lbl = document.getElementById('loginBtnLabel');
+  const spn = document.getElementById('loginBtnSpinner');
+  if (lbl) lbl.style.display = 'none';
+  if (spn) spn.style.display = 'inline';
+  if (btn) btn.disabled = true;
+
+  const resetLoginBtn = () => {
+    if (lbl) lbl.style.display = 'inline';
+    if (spn) spn.style.display = 'none';
+    if (btn) btn.disabled = false;
+  };
+
+  // Try Apps Script login first
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler((res) => {
+        resetLoginBtn();
+        if (res && res.success && res.user) {
+          completeLogin(res.user.username, res.user.name, res.user.role, res.user.departments);
+        } else {
+          showBottomRightToast('Login Failed', res.error || 'Invalid username or password.');
+        }
+      })
+      .withFailureHandler(() => {
+        resetLoginBtn();
+        localLoginFallback(u, p);
+      })
+      .loginUser(u, p);
+  } else {
+    resetLoginBtn();
+    localLoginFallback(u, p);
+  }
+}
+
+function localLoginFallback(u, p) {
+  const foundUser = usersList.find(x => x.username.toLowerCase() === u.toLowerCase());
+  if (!foundUser) {
+    // Still allow if username typed exactly matches one — graceful for first-time setup
+    showBottomRightToast('Login Failed', 'Username not found. Check spelling or contact admin.');
+    return;
+  }
+  // Only validate password if the user has one stored
+  if (foundUser.password && String(foundUser.password).length > 0 && String(foundUser.password) !== String(p)) {
+    showBottomRightToast('Login Failed', 'Incorrect password. Try again or contact admin.');
+    return;
+  }
+  completeLogin(foundUser.username, foundUser.name, foundUser.role, foundUser.departments);
+}
+
+function completeLogin(username, name, role, departments) {
+  currentUserObj.username = username;
+  currentUserObj.name = name || username;
+  currentUserObj.role = role || 'standard';
+  currentUserObj.departments = departments || 'OS,TOS,Format,2017';
+
+  isNotificationsCleared = false;
+  loadDismissedIds(username);    // restore persisted dismissals — do NOT wipe them on login
+  shownToastNotifIds = new Set(); // reset toast shown state for new session only
+  knownTicketJobNos = new Set(); // reset so first sync populates baseline without toasting
+
+  // Restore saved filters for this user (or set smart defaults)
+  loadUserFilters(username);
+
+  document.getElementById("screenLogin").classList.remove("active");
+  document.getElementById("screenApp").classList.add("active");
+  document.getElementById("sbUserName").innerText = currentUserObj.name;
+  document.getElementById("sbAvatar").innerText = username.charAt(0).toUpperCase();
+  document.getElementById("sbUserRole").innerText = currentUserObj.role.replace(/_/g, ' ').toUpperCase();
+  document.getElementById("welcomeGreeting").innerText = `Good Morning, ${currentUserObj.name}! ☀️`;
+
+  // Set default Input Mode for New Ticket form to Helpline
+  const paneModeEl = document.getElementById("paneNewMode");
+  if (paneModeEl) paneModeEl.value = "Helpline";
+
+  applyRoleBasedUI();
+  updateFilterChipsUI();
+  syncData();
+}
+
+function performLogout() {
+  currentUserObj = { username: '', name: '', role: 'standard', departments: 'OS,TOS,Format,2017' };
+  isNotificationsCleared = false;
+  document.getElementById("loginUsernameInput").value = "";
+  document.getElementById("loginPasswordInput").value = "";
+  document.getElementById("screenApp").classList.remove("active");
+  document.getElementById("screenLogin").classList.add("active");
+  // Reset admin sidebar visibility so next login starts fresh
+  ['sb-section-admin','sb-nav-settings','sb-nav-users'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function syncData(isManual = false) {
+  const btn = document.getElementById("btnRefreshData");
+  const spinIcon = document.getElementById("refreshSpinIcon");
+  if (isManual) {
+    if (btn) btn.disabled = true;
+    if (spinIcon) spinIcon.classList.add("spin");
+  }
+
+  const finishSync = () => {
+    if (btn) btn.disabled = false;
+    if (spinIcon) spinIcon.classList.remove("spin");
+  };
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler((res) => {
+        finishSync();
+        if (res && res.success) {
+          const isFirstSync = (knownTicketJobNos.size === 0);
+
+          if (res.tickets && res.tickets.length > 0) {
+            res.tickets.forEach(t => {
+              t.jobNo = formatJobNo(t.jobNo);
+            });
+            if (!isFirstSync) {
+              res.tickets.forEach(t => {
+                if (!knownTicketJobNos.has(t.jobNo)) {
+                  handleNewTicketNotif(t);
+                }
+              });
+            }
+            ticketsData = res.tickets;
+            knownTicketJobNos = new Set(res.tickets.map(t => t.jobNo));
+          }
+
+          if (res.users && res.users.length > 0) {
+            usersList = res.users;
+            rebuildUserDropdowns();
+            const myUserFromSheet = usersList.find(u => u.username.toLowerCase() === (currentUserObj.username || '').toLowerCase());
+            if (myUserFromSheet && myUserFromSheet.role !== currentUserObj.role) {
+              currentUserObj.role = myUserFromSheet.role;
+              currentUserObj.departments = myUserFromSheet.departments;
+              applyRoleBasedUI();
+            }
+          }
+          renderStats();
+          renderTicketsTable();
+          renderPerformanceDashboard();
+          generateNotifications();
+          if (isManual) showBottomRightToast('🔄 Data Refreshed', 'Synced with Google Sheet!');
+        }
+      })
+      .withFailureHandler(() => {
+        finishSync();
+        renderStats();
+        renderTicketsTable();
+        renderPerformanceDashboard();
+        generateNotifications();
+      })
+      .getInitialData(currentUserObj.username || '');
+  } else {
+    finishSync();
+    if (knownTicketJobNos.size === 0) {
+      knownTicketJobNos = new Set(ticketsData.map(t => t.jobNo));
+    }
+    renderStats();
+    renderTicketsTable();
+    renderPerformanceDashboard();
+    generateNotifications();
+  }
+}
+
+function handleNewTicketNotif(t) {
+  // Notify users strictly matching ticket department
+  const tDept = normalizeDept(t.department).toUpperCase();
+  const uDepts = (currentUserObj.departments || 'OS,TOS,Format,2017').split(',').map(d => d.trim().toUpperCase());
+  if (!uDepts.includes(tDept)) return;
+
+  const notifId = `notif-new-${t.jobNo}`;
+  if (dismissedNotifIds.has(notifId)) return; // already dismissed
+
+  // Show toast immediately
+  showNewTicketToast(t);
+
+  // Add to notification bell
+  userNotifications.unshift({
+    id: notifId,
+    jobNo: t.jobNo,
+    title: `🆕 New Ticket — ${t.department}`,
+    sub: `${t.partyName} | ${(t.query || '').substring(0, 60)}`,
+    time: t.date || getTodayFormatted()
+  });
+  renderNotifications();
+}
+
+function showNewTicketToast(t) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.style.cssText = 'border-left:4px solid var(--green-text); cursor:pointer;';
+  el.innerHTML = `
+    <div>
+      <div style="font-weight:800; color:var(--green-text); font-size:13px;">🆕 New Ticket — ${escapeHtml(t.department)}</div>
+      <div style="font-weight:700; color:var(--text); margin-top:2px;">${escapeHtml(t.partyName)}</div>
+      <div style="font-size:11.5px; color:var(--text2); margin-top:1px;">${escapeHtml((t.query||'').substring(0,70))}</div>
+      <div style="font-size:10px; color:var(--blue); font-weight:700; margin-top:4px;">Ticket: ${t.jobNo} • Click to open</div>
+    </div>
+  `;
+  el.onclick = () => { openTicketDetailAndDock(t.jobNo); el.remove(); };
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 7000); // new ticket toast stays 7s
+}
+
+function rebuildUserDropdowns() {
+  const assignOpts = `<option value="Unassigned">-- Unassigned --</option>` +
+    usersList.map(u => `<option value="${escapeHtml(u.username)}">${escapeHtml(u.name || u.username)}</option>`).join('');
+  ['detailAssigned', 'paneNewAssigned'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = assignOpts;
+  });
+}
+
+function mapDisplayNameToSheetUsername(displayName) {
+  if (!displayName) return "";
+  const str = String(displayName).trim();
+  if (str.toLowerCase() === "unassigned" || str === "") return "";
+  const match = usersList.find(u => 
+    (u.name && u.name.toLowerCase() === str.toLowerCase()) || 
+    u.username.toLowerCase() === str.toLowerCase()
+  );
+  return match ? match.username : str;
+}
+
+function renderStats() {
+  const uName = (currentUserObj.username || "").toLowerCase();
+  const uNameDisplay = (currentUserObj.name || currentUserObj.username || "").toLowerCase();
+  const uDepts = currentUserObj.departments || "OS,TOS,Format,2017";
+
+  const openTickets = ticketsData.filter(t => t.isOpen);
+
+  // 1. My Dept Open Tickets
+  const myDeptOpen = openTickets.filter(t => matchUserDepartment(uDepts, t.department));
+  document.getElementById("statCard1Num").innerText = myDeptOpen.length;
+
+  // 2. Pending Follow-Up Today in My Dept
+  const myDeptPending = myDeptOpen.filter(t => !isFollowupTakenToday(t));
+  document.getElementById("statCard2Num").innerText = myDeptPending.length;
+
+  // 3. Assigned to Me Open Tickets
+  const assignedToMe = openTickets.filter(t => {
+    const r = (t.resolvedBy || "").toLowerCase();
+    return r === uName || r === uNameDisplay;
+  });
+  document.getElementById("statCard3Num").innerText = assignedToMe.length;
+
+  // 4. Total Open Tickets across all depts
+  document.getElementById("statCard4Num").innerText = openTickets.length;
+}
+
+/* ── FILTER PERSISTENCE (localStorage per user) ── */
+function getFilterStorageKey(username) {
+  return `ornate_filters_${(username || 'default').toLowerCase()}`;
+}
+
+function saveUserFilters(username) {
+  try {
+    const key = getFilterStorageKey(username || currentUserObj.username);
+    const data = {
+      activeMultiFilters: activeMultiFilters,
+      selectedDeptFilter: selectedDeptFilter,
+      sortColumn: sortColumn,
+      sortAsc: sortAsc
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch(e) { /* localStorage not available in some contexts */ }
+}
+
+function loadUserFilters(username) {
+  try {
+    const key = getFilterStorageKey(username);
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      if (saved.activeMultiFilters) {
+        activeMultiFilters = Object.assign({
+          "OPEN": true, "CLOSED": false, "PENDING_TODAY": false,
+          "MY_DEPT": true, "MY_ASSIGNED": false, "UNASSIGNED": false
+        }, saved.activeMultiFilters);
+      }
+      if (saved.selectedDeptFilter !== undefined) selectedDeptFilter = saved.selectedDeptFilter;
+      if (saved.sortColumn !== undefined) sortColumn = saved.sortColumn;
+      if (saved.sortAsc !== undefined) sortAsc = saved.sortAsc;
+      updateSortHeaderIcons();
+      return;
+    }
+  } catch(e) {}
+
+  activeMultiFilters = {
+    "OPEN": true, "CLOSED": false, "PENDING_TODAY": false,
+    "MY_DEPT": true, "MY_ASSIGNED": false, "UNASSIGNED": false
+  };
+  selectedDeptFilter = "ALL";
+  sortColumn = "date";
+  sortAsc = false;
+  updateSortHeaderIcons();
+}
+
+function sortByColumn(col) {
+  if (sortColumn === col) {
+    sortAsc = !sortAsc;
+  } else {
+    sortColumn = col;
+    sortAsc = (col === 'date' || col === 'lastUpdatedDate') ? false : true;
+  }
+  updateSortHeaderIcons();
+  saveUserFilters();
+  renderTicketsTable();
+}
+
+function updateSortHeaderIcons() {
+  ['jobNo','date','partyName','department','lastUpdatedDate','status','resolvedBy'].forEach(c => {
+    const el = document.getElementById(`sort-icon-${c}`);
+    if (el) {
+      if (sortColumn === c) {
+        el.innerText = sortAsc ? '▲' : '▼';
+        el.style.color = 'var(--blue)';
+      } else {
+        el.innerText = '';
+      }
+    }
+  });
+  const btn = document.getElementById('sortToggleBtn');
+  if (btn) btn.innerText = sortAsc ? '↑ Oldest First' : '↓ Newest First';
+}
+
+function toggleSort() {
+  sortAsc = !sortAsc;
+  updateSortHeaderIcons();
+  saveUserFilters();
+  renderTicketsTable();
+}
+
+function parseDateToTimestamp(dateStr) {
+  if (!dateStr) return 0;
+  const str = String(dateStr).trim();
+  const match = str.match(/(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{2,4})/);
+  if (match) {
+    const d = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10) - 1;
+    let y = parseInt(match[3], 10);
+    if (y < 100) y += 2000;
+    return new Date(y, m, d).getTime();
+  }
+  return new Date(str).getTime() || 0;
+}
+
+/* ── ENHANCED MULTI-FILTER & DEPARTMENT AUTO-SELECTION ── */
+function toggleMultiFilter(key) {
+  activeMultiFilters[key] = !activeMultiFilters[key];
+  if (!activeMultiFilters["OPEN"] && !activeMultiFilters["CLOSED"]) {
+    if (key === "OPEN") activeMultiFilters["CLOSED"] = true;
+    else activeMultiFilters["OPEN"] = true;
+  }
+
+  // AUTO-SELECT USER'S ASSIGNED DEPARTMENT(S) WHEN MY_DEPT IS TOGGLED ON
+  if (key === "MY_DEPT") {
+    if (activeMultiFilters["MY_DEPT"]) {
+      const uDepts = (currentUserObj.departments || "OS,TOS,Format,2017").split(",").map(d => d.trim().toUpperCase()).filter(Boolean);
+      if (uDepts.length === 1) {
+        selectedDeptFilter = uDepts[0];
+      } else {
+        selectedDeptFilter = "MY_DEPT_MULTI";
+      }
+    } else {
+      selectedDeptFilter = "ALL";
+    }
+  }
+
+  saveUserFilters();
+  updateFilterChipsUI();
+  renderTicketsTable();
+}
+
+function updateFilterChipsUI() {
+  ["OPEN", "CLOSED", "PENDING_TODAY", "MY_DEPT", "MY_ASSIGNED", "UNASSIGNED"].forEach(key => {
+    const el = document.getElementById(`chip-${key}`);
+    if (el) {
+      if (activeMultiFilters[key]) el.classList.add("on");
+      else el.classList.remove("on");
+    }
+  });
+  updateDeptFilterChipsUI();
+}
+
+function filterByDept(deptName) {
+  selectedDeptFilter = deptName;
+  if (deptName === "ALL") {
+    activeMultiFilters["MY_DEPT"] = false;
+  }
+  saveUserFilters();
+  updateFilterChipsUI();
+  renderTicketsTable();
+}
+
+function updateDeptFilterChipsUI() {
+  const uDepts = (currentUserObj.departments || "OS,TOS,Format,2017").split(",").map(d => d.trim().toUpperCase()).filter(Boolean);
+
+  ["ALL", "OS", "TOS", "Format", "2017"].forEach(d => {
+    const el = document.getElementById(`chip-dept-${d}`);
+    if (el) {
+      let shouldHighlight = false;
+      if (selectedDeptFilter === "ALL") {
+        shouldHighlight = (d === "ALL");
+      } else if (selectedDeptFilter === "MY_DEPT_MULTI") {
+        shouldHighlight = (d !== "ALL" && uDepts.includes(d.toUpperCase()));
+      } else {
+        shouldHighlight = (d.toUpperCase() === selectedDeptFilter.toUpperCase());
+      }
+      if (shouldHighlight) el.classList.add("on");
+      else el.classList.remove("on");
+    }
+  });
+}
+
+function getDeptChipLabel(dept) {
+  if (dept === 'ALL') return '🌐 All Depts';
+  if (dept === 'OS') return '💻 OS';
+  if (dept === 'TOS') return '🚨 TOS';
+  if (dept === 'Format') return '📄 Format';
+  if (dept === '2017') return '🏷️ 2017';
+  return dept;
+}
+
+function isDateTodayFrontend(dateVal) {
+  if (!dateVal) return false;
+  const todayStr = getTodayFormatted();
+  const str = String(dateVal).trim();
+  if (str === todayStr) return true;
+
+  const match = str.match(/(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{2,4})/);
+  if (match) {
+    const d = String(match[1]).padStart(2, '0');
+    const m = String(match[2]).padStart(2, '0');
+    let y = match[3];
+    if (y.length === 2) y = "20" + y;
+    return `${d}.${m}.${y}` === todayStr;
+  }
+  return false;
+}
+
+function isFollowupTakenToday(t) {
+  if (!t.remark) return false;
+  const rem = String(t.remark).trim().toLowerCase();
+  if (!rem || rem.includes("no remarks yet") || rem.includes("ticket created")) {
+    return false;
+  }
+  return t.updatedToday || isDateTodayFrontend(t.lastUpdatedDate);
+}
+
+function renderTicketsTable() {
+  const tbody = document.getElementById("ticketsTableBody");
+  const q = document.getElementById("universalSearchInput").value.toLowerCase().trim();
+  const uName = (currentUserObj.username || "").toLowerCase();
+  const uDeptsStr = currentUserObj.departments || "OS,TOS,Format,2017";
+
+  const filtered = ticketsData.filter(t => {
+    // Skip blank rows — sheet rows with only a job no but no party name or query
+    if (!t.partyName || t.partyName.trim() === '' || t.partyName === t.jobNo) return false;
+
+    const isFollowupDone = isFollowupTakenToday(t);
+
+    if (q) {
+      const matchJob = t.jobNo.toLowerCase().includes(q);
+      const matchParty = t.partyName.toLowerCase().includes(q);
+      const matchPhone = (t.phone || extractPhone(t.partyName)).toLowerCase().includes(q);
+      const matchQuery = (t.query || "").toLowerCase().includes(q);
+      const matchRemark = (t.remark || "").toLowerCase().includes(q);
+      return matchJob || matchParty || matchPhone || matchQuery || matchRemark;
+    }
+
+    if (!activeMultiFilters["OPEN"] && t.isOpen) return false;
+    if (!activeMultiFilters["CLOSED"] && !t.isOpen) return false;
+
+    if (selectedDeptFilter === "MY_DEPT_MULTI") {
+      if (!matchUserDepartment(uDeptsStr, t.department)) return false;
+    } else if (selectedDeptFilter !== "ALL") {
+      const normTicketDept = normalizeDept(t.department).toUpperCase();
+      if (normTicketDept !== selectedDeptFilter.toUpperCase()) return false;
+    }
+
+    if (activeMultiFilters["PENDING_TODAY"] && isFollowupDone) return false;
+    if (activeMultiFilters["MY_DEPT"] && !matchUserDepartment(uDeptsStr, t.department)) return false;
+    if (activeMultiFilters["MY_ASSIGNED"]) {
+      const uNameDisplay = (currentUserObj.name || currentUserObj.username || "").toLowerCase();
+      const r = (t.resolvedBy || "").toLowerCase();
+      if (r !== uName && r !== uNameDisplay) return false;
+    }
+    if (activeMultiFilters["UNASSIGNED"] && t.resolvedBy && t.resolvedBy !== "Unassigned") return false;
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    document.getElementById("ticketCountLabel").innerText = "Showing 0 tickets";
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:var(--text3); font-weight:700;">No tickets found matching your query or active multi-filters.</td></tr>`;
+    return;
+  }
+
+  // Sort filtered array by sortColumn and sortAsc
+  filtered.sort((a, b) => {
+    let valA = a[sortColumn];
+    let valB = b[sortColumn];
+
+    if (sortColumn === 'date' || sortColumn === 'lastUpdatedDate') {
+      valA = parseDateToTimestamp(valA);
+      valB = parseDateToTimestamp(valB);
+    } else if (typeof valA === 'string' || typeof valB === 'string') {
+      valA = String(valA || '').toLowerCase();
+      valB = String(valB || '').toLowerCase();
+    }
+
+    if (valA < valB) return sortAsc ? -1 : 1;
+    if (valA > valB) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const countLabel = document.getElementById("ticketCountLabel");
+  if (countLabel) {
+    countLabel.innerText = `Showing ${filtered.length} of ${ticketsData.length} tickets (${sortColumn ? sortColumn + ' ' + (sortAsc ? '▲' : '▼') : 'Newest First'})`;
+  }
+
+  tbody.innerHTML = filtered.map(t => {
+    const isFollowupDone = isFollowupTakenToday(t);
+    return `
+      <tr class="trow" onclick="openTicketDetailAndDock('${t.jobNo}')">
+        <td class="td-id">${t.jobNo}</td>
+        <td>${t.date}</td>
+        <td class="td-name">${escapeHtml(t.partyName)}</td>
+        <td><span style="font-weight:700; color:var(--text2); font-size:12px;">${escapeHtml(t.writtenBy || 'User')}</span></td>
+        <td>
+          <span class="pill dept">${t.department}</span>
+          ${t.priority && t.priority !== 'Normal' ? `<div style="margin-top:3px;"><span style="background:var(--red-light); color:var(--red-text); font-weight:800; font-size:10px; border:1px solid var(--red-subtle); border-radius:6px; padding:2px 6px; display:inline-block;">🔥 ${escapeHtml(t.priority)}</span></div>` : ''}
+        </td>
+        <td class="td-query">${escapeHtml(t.query)}</td>
+        <td>
+          <div style="font-size:12px; font-weight:700;">${t.lastUpdatedDate || t.date}</div>
+          <div style="margin-top:2px;">
+            ${isFollowupDone ? `<span class="pill closed" style="background:var(--green-light); color:var(--green-text); font-size:10px;">Today</span>` : `<span class="pill open" style="font-size:10px;">Pending</span>`}
+          </div>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <div class="remark-cell">
+            ${(() => {
+              const lines = (t.remark || '').split('\n').map(l => l.trim()).filter(Boolean);
+              if (!lines.length) return `<div class="remark-entry"><div class="remark-meta" style="color:var(--text3);font-style:italic;">No remarks yet</div></div>`;
+              return lines.slice(0, 3).map((line, i) => {
+                // Parse "DD.MM.YYYY - Author (HH:MM AM) - remark text" format
+                const dashParts = line.split(' - ');
+                const metaPart = dashParts.length >= 2 ? `${dashParts[0]} - ${dashParts[1]}` : dashParts[0];
+                const bodyPart = dashParts.length >= 3 ? dashParts.slice(2).join(' - ') : line;
+                return `<div class="remark-entry" style="${i > 0 ? 'opacity:0.75;' : ''}">
+                  <div class="remark-meta">${escapeHtml(metaPart)}</div>
+                  <div>${escapeHtml(bodyPart)}</div>
+                </div>`;
+              }).join('');
+            })()}
+          </div>
+        </td>
+        <td><span class="pill ${t.isOpen ? 'open' : 'closed'}">${t.isOpen ? 'OPEN' : escapeHtml(t.status)}</span></td>
+        <td style="font-weight:700;">${escapeHtml(t.resolvedBy || 'Unassigned')}</td>
+        <td><span style="color:var(--blue); font-weight:700;">View</span></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+/* ── PERFORMANCE DASHBOARD RENDERER & ACCORDION STATE ── */
+let openDeptAccordionIndexes = new Set();
+
+function renderPerformanceDashboard() {
+  const openTickets = ticketsData.filter(t => t.isOpen);
+  const followedToday = openTickets.filter(t => t.updatedToday);
+  const pendingToday = openTickets.filter(t => !t.updatedToday);
+  const unassigned = openTickets.filter(t => !t.resolvedBy || t.resolvedBy === 'Unassigned');
+
+  document.getElementById("perfKpiTotalOpen").innerText = openTickets.length;
+  document.getElementById("perfKpiFollowedToday").innerText = followedToday.length;
+  document.getElementById("perfKpiPendingToday").innerText = pendingToday.length;
+  document.getElementById("perfKpiUnassigned").innerText = unassigned.length;
+  document.getElementById("perfTotalOpenDeptLabel").innerText = `${openTickets.length} Total`;
+  document.getElementById("perfPendingDeptLabel").innerText = `${pendingToday.length} Pending`;
+
+  const depts = ["OS", "TOS", "Format", "2017"];
+  const deptData = depts.map((dName, idx) => {
+    // Exact department matching to prevent TOS matching OS
+    const dTickets = openTickets.filter(t => normalizeDept(t.department).toUpperCase() === dName.toUpperCase());
+    const dFollowed = dTickets.filter(t => t.updatedToday).length;
+    const dPending = dTickets.filter(t => !t.updatedToday).length;
+    const dUnassigned = dTickets.filter(t => !t.resolvedBy || t.resolvedBy === 'Unassigned').length;
+
+    const execMap = {};
+    dTickets.forEach(t => {
+      const u = t.resolvedBy || 'Unassigned';
+      if (!execMap[u]) execMap[u] = { name: u, followed: 0, pending: 0, unassigned: 0 };
+      if (t.updatedToday) execMap[u].followed++;
+      else execMap[u].pending++;
+      if (u === 'Unassigned') execMap[u].unassigned++;
+    });
+
+    return {
+      idx,
+      name: dName,
+      total: dTickets.length,
+      followed: dFollowed,
+      pending: dPending,
+      unassigned: dUnassigned,
+      execs: Object.values(execMap)
+    };
+  });
+
+  const deptRowsHtml = deptData.map(d => {
+    const total = d.total || 1;
+    const pGreen = (d.followed / total * 100).toFixed(1);
+    const pRed = (d.pending / total * 100).toFixed(1);
+    const pGray = (d.unassigned / total * 100).toFixed(1);
+
+    const isOpen = openDeptAccordionIndexes.has(d.idx);
+
+    return `
+      <div class="dept-row" onclick="toggleExecs(${d.idx})">
+        <div class="dept-icon">📂</div>
+        <div class="dept-info">
+          <div class="dept-name">${d.name} Dept</div>
+          <div class="dept-sub">${d.execs.length} Executives</div>
+        </div>
+        <div class="bar-container">
+          <div class="seg green" style="width:${pGreen}%;" title="${d.name} Dept — Followed Up Today: ${d.followed} tickets (${pGreen}%)"></div>
+          <div class="seg red" style="width:${pRed}%;" title="${d.name} Dept — Pending Follow-Up: ${d.pending} tickets (${pRed}%)"></div>
+          ${d.unassigned > 0 ? `<div class="seg gray" style="width:${pGray}%;" title="${d.name} Dept — Unassigned Queue: ${d.unassigned} tickets (${pGray}%)"></div>` : ''}
+        </div>
+        <div class="dept-count" title="${d.name} Dept Total Open Tickets">${d.total}</div>
+        <div class="chev" id="chev-${d.idx}" style="transform:${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'}; transition:transform .2s;">▼</div>
+      </div>
+
+      <div class="exec-wrap" id="wrap-${d.idx}" style="display:${isOpen ? 'block' : 'none'};">
+        ${d.execs.map(e => `
+          <div class="exec-row">
+            <div class="exec-av">${e.name.charAt(0)}</div>
+            <div style="width:110px; flex-shrink:0;">
+              <div style="font-size:12px; font-weight:700;">${escapeHtml(e.name)}</div>
+              <div style="font-size:10px; color:var(--text3);">${d.name} Staff</div>
+            </div>
+            <div class="bar-container">
+              <div class="seg green" style="width:${(e.followed/(e.followed+e.pending||1)*100).toFixed(1)}%;" title="${escapeHtml(e.name)} — Followed Up Today: ${e.followed} tickets"></div>
+              <div class="seg red" style="width:${(e.pending/(e.followed+e.pending||1)*100).toFixed(1)}%;" title="${escapeHtml(e.name)} — Pending Follow-Up: ${e.pending} tickets"></div>
+            </div>
+            <div style="width:36px; text-align:right; font-weight:800; font-family:var(--mono);" title="Total Tickets Assigned">${e.followed + e.pending}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("deptRowsContainer").innerHTML = deptRowsHtml;
+
+  const totalOpenCount = openTickets.length || 1;
+  document.getElementById("perfOpenByDeptWidgets").innerHTML = deptData.map(d => `
+    <div class="vis-item">
+      <div class="vis-top">
+        <span class="vis-name">💻 ${d.name} Department</span>
+        <span class="vis-val" style="color:var(--blue)">${d.total} Open</span>
+      </div>
+      <div class="vis-track"><div class="vis-fill" style="width:${(d.total/totalOpenCount*100).toFixed(1)}%; background:var(--blue);"></div></div>
+    </div>
+  `).join("");
+
+  const totalPendingCount = pendingToday.length || 1;
+  document.getElementById("perfPendingByDeptWidgets").innerHTML = deptData.map(d => `
+    <div class="vis-item">
+      <div class="vis-top">
+        <span class="vis-name">🚨 ${d.name} Department</span>
+        <span class="vis-val" style="color:var(--red-text)">${d.pending} Pending</span>
+      </div>
+      <div class="vis-track"><div class="vis-fill" style="width:${(d.pending/totalPendingCount*100).toFixed(1)}%; background:var(--red-text);"></div></div>
+    </div>
+  `).join("");
+
+  // ── 4. TOP PERFORMERS OF THE DAY COMPUTATION ──
+  const execActivityToday = {};
+
+  ticketsData.forEach(t => {
+    if (t.updatedToday || isFollowupTakenToday(t)) {
+      let execName = t.resolvedBy || 'Unassigned';
+
+      if (t.remark && typeof t.remark === 'string') {
+        const todayStr = getTodayFormatted();
+        const lines = t.remark.split('\n');
+        for (let l of lines) {
+          if (l.includes(todayStr)) {
+            const match = l.match(/\d{1,2}[\.\/\-]\d{1,2}[\.\/\-]\d{2,4}\s*[\-\@]\s*([A-Za-z0-9\s]+?)(?:\s*\(|\s*\-)/);
+            if (match && match[1]) {
+              const parsedName = match[1].trim();
+              if (parsedName && parsedName.toLowerCase() !== 'user' && parsedName.toLowerCase() !== 'staff') {
+                execName = parsedName;
+              }
+            }
+          }
+        }
+      }
+
+      if (execName && execName !== 'Unassigned') {
+        execActivityToday[execName] = (execActivityToday[execName] || 0) + 1;
+      }
+    }
+  });
+
+  const sortedPerformers = Object.keys(execActivityToday)
+    .map(name => ({ name, count: execActivityToday[name] }))
+    .sort((a, b) => b.count - a.count);
+
+  const totalActionsToday = sortedPerformers.reduce((acc, x) => acc + x.count, 0);
+
+  const topPerfLabel = document.getElementById("perfTopPerformerCountLabel");
+  if (topPerfLabel) {
+    topPerfLabel.innerText = `${totalActionsToday} Action${totalActionsToday === 1 ? '' : 's'} Today`;
+  }
+
+  const topPerfContainer = document.getElementById("perfTopPerformersWidget");
+  if (topPerfContainer) {
+    if (sortedPerformers.length === 0) {
+      topPerfContainer.innerHTML = `<div style="font-size:12px; color:var(--text3); font-weight:700; text-align:center; padding:12px 0;">No executive follow-ups recorded yet today.</div>`;
+    } else {
+      const medals = ['🥇', '🥈', '🥉', '⭐', '⭐'];
+      const maxCount = sortedPerformers[0].count || 1;
+      topPerfContainer.innerHTML = sortedPerformers.map((p, idx) => {
+        const medal = medals[idx] || '⭐';
+        const pct = (p.count / maxCount * 100).toFixed(1);
+        const isTop = idx === 0;
+
+        return `
+          <div class="vis-item" style="margin-bottom:10px;">
+            <div class="vis-top" style="align-items:center;">
+              <span class="vis-name" style="font-weight:${isTop ? '900' : '700'}; color:${isTop ? 'var(--blue)' : 'var(--text)'}; font-size:12.5px;">
+                ${medal} ${escapeHtml(p.name)}
+              </span>
+              <span class="vis-val" style="color:${isTop ? 'var(--blue)' : 'var(--text2)'}; font-size:12px;">
+                ${p.count} Ticket${p.count === 1 ? '' : 's'}
+              </span>
+            </div>
+            <div class="vis-track">
+              <div class="vis-fill" style="width:${pct}%; background:${isTop ? 'linear-gradient(90deg, #2563EB, #3B82F6)' : 'var(--blue-mid)'};"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+}
+
+function toggleExecs(idx) {
+  const wrap = document.getElementById(`wrap-${idx}`);
+  const chev = document.getElementById(`chev-${idx}`);
+  if (wrap) {
+    const isHidden = wrap.style.display === '' || wrap.style.display === 'none';
+    if (isHidden) {
+      wrap.style.display = 'block';
+      if (chev) chev.style.transform = 'rotate(180deg)';
+      openDeptAccordionIndexes.add(idx);
+    } else {
+      wrap.style.display = 'none';
+      if (chev) chev.style.transform = 'rotate(0deg)';
+      openDeptAccordionIndexes.delete(idx);
+    }
+  }
+}
+
+function switchPage(pageKey) {
+  currentOpenPage = pageKey;
+  if (pageKey !== 'detail') currentOpenJobNo = null;
+
+  document.getElementById("pageTickets").classList.remove("active");
+  document.getElementById("pagePerf").classList.remove("active");
+  document.getElementById("pageDetail").classList.remove("active");
+  document.getElementById("pageNewTicketPane").classList.remove("active");
+
+  document.getElementById("sb-nav-tickets").classList.remove("active");
+  document.getElementById("sb-nav-perf").classList.remove("active");
+
+  const titleEl = document.getElementById("pageHeaderTitle");
+  const subEl = document.getElementById("pageHeaderSub");
+
+  if (pageKey === 'tickets') {
+    document.getElementById("pageTickets").classList.add("active");
+    document.getElementById("sb-nav-tickets").classList.add("active");
+    if (titleEl) titleEl.innerText = '📊 All Support Tickets';
+    if (subEl) subEl.innerText = 'Live ticket queue with latest remark log history';
+  } else if (pageKey === 'perf') {
+    document.getElementById("pagePerf").classList.add("active");
+    document.getElementById("sb-nav-perf").classList.add("active");
+    if (titleEl) titleEl.innerText = '📈 Performance Dashboard';
+    if (subEl) subEl.innerText = 'Team & department activity overview';
+    renderPerformanceDashboard();
+  } else if (pageKey === 'newTicketPane') {
+    document.getElementById("pageNewTicketPane").classList.add("active");
+    if (titleEl) titleEl.innerText = '➕ Log New Support Ticket';
+    if (subEl) subEl.innerText = 'Fill in the form — real-time duplicate detection active';
+  } else if (pageKey === 'detail') {
+    document.getElementById("pageDetail").classList.add("active");
+    if (titleEl) titleEl.innerText = `🔍 Ticket Detail — ${currentOpenJobNo || ''}`;
+    if (subEl) subEl.innerText = 'View, update, and log follow-up remarks';
+  }
+
+  updateDockUI();
+}
+
+function openTicketDetailAndDock(jobNo) {
+  const t = ticketsData.find(x => x.jobNo === jobNo);
+  if (!t) return;
+  currentOpenJobNo = jobNo;
+
+  const jobHeaderEl = document.getElementById("detailJobNoHeader");
+  if (jobHeaderEl) jobHeaderEl.innerText = t.jobNo;
+
+  const pNameInput = document.getElementById("detailPartyNameInput");
+  if (pNameInput) pNameInput.value = t.partyName || '';
+
+  const pPhoneInput = document.getElementById("detailPartyPhoneInput");
+  if (pPhoneInput) pPhoneInput.value = t.phone || extractPhone(t.partyName) || '';
+
+  const writtenByInput = document.getElementById("detailWrittenByInput");
+  if (writtenByInput) writtenByInput.value = t.writtenBy || 'User';
+
+  const dateDisplayEl = document.getElementById("detailDateDisplay");
+  if (dateDisplayEl) dateDisplayEl.innerText = t.date || 'Today';
+  
+  const modeEl = document.getElementById("detailMode");
+  if (modeEl) {
+    const rawM = (t.mode || '').toLowerCase();
+    if (rawM.includes('ivr')) modeEl.value = 'IVR';
+    else if (rawM.includes('mail')) modeEl.value = 'Mail';
+    else if (rawM.includes('whatsapp') || rawM.includes('wp')) modeEl.value = 'Whatsapp';
+    else if (rawM.includes('mode')) modeEl.value = 'Mode';
+    else modeEl.value = 'Helpline';
+  }
+
+  document.getElementById("detailDept").value = t.department || "OS";
+  document.getElementById("detailAssigned").value = t.resolvedBy || "Unassigned";
+  document.getElementById("detailQuery").value = t.query || "";
+
+  // Sync priority tag with custom input support
+  const priority = t.priority || 'Normal';
+  const pSelect = document.getElementById("detailPriorityTag");
+  const pCustom = document.getElementById("detailPriorityCustomInput");
+  if (['Normal', 'Urgent', 'High Priority', 'Tomorrow'].includes(priority)) {
+    if (pSelect) pSelect.value = priority;
+    if (pCustom) { pCustom.style.display = 'none'; pCustom.value = ''; }
+  } else {
+    if (pSelect) pSelect.value = 'Custom Input...';
+    if (pCustom) { pCustom.style.display = 'block'; pCustom.value = priority; }
+  }
+
+  // Sync status pill selection with exact matching
+  const statusVal = (t.status === 'Open' || !t.status) ? '' : String(t.status).trim();
+  document.getElementById("detailStatusInput").value = statusVal;
+  
+  const pills = document.querySelectorAll("#detailStatusPillGrid .status-radio-pill");
+  pills.forEach(p => p.classList.remove("selected"));
+  let matched = false;
+  let activePillText = '🔴 Blank (Open)';
+  pills.forEach(p => {
+    const txt = p.innerText.trim();
+    if (statusVal === '' && (txt.includes('Blank') || txt.includes('Open'))) {
+      p.classList.add("selected");
+      matched = true;
+      activePillText = txt;
+    } else if (statusVal !== '' && txt.toLowerCase().includes(statusVal.toLowerCase())) {
+      p.classList.add("selected");
+      matched = true;
+      activePillText = txt;
+    }
+  });
+  if (!matched && pills.length > 0) {
+    pills[0].classList.add("selected");
+    activePillText = pills[0].innerText.trim();
+  }
+
+  const badgeTextEl = document.getElementById("detailSelectedStatusText");
+  if (badgeTextEl) badgeTextEl.innerText = activePillText;
+
+  // Sync status badge header
+  const statusHeader = document.getElementById("detailStatusHeader");
+  if (statusHeader) {
+    statusHeader.className = `pill ${t.isOpen ? 'open' : 'closed'}`;
+    statusHeader.innerText = t.isOpen ? 'OPEN' : (t.status || 'CLOSED');
+  }
+
+  renderDetailLogs(t.remark);
+  document.getElementById("newRemarkText").value = "";
+
+  if (!dockedItems.some(d => d.id === jobNo)) {
+    dockedItems.push({ id: jobNo, label: `${jobNo} (${t.partyName.split(' ')[0]})`, type: 'ticket' });
+  }
+
+  switchPage('detail');
+}
+
+function renderDetailLogs(remarkStr) {
+  const container = document.getElementById("detailRemarkLogContainer");
+  if (!remarkStr) {
+    container.innerHTML = `<div style="color:var(--text3); font-style:italic;">No remarks logged yet.</div>`;
+    return;
+  }
+  const lines = remarkStr.split('\n').filter(Boolean);
+  container.innerHTML = lines.map(line => `
+    <div style="background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
+      <div style="font-size:11px; font-weight:800; color:var(--blue); margin-bottom:4px;">${escapeHtml(line.split('-')[0] || '')}</div>
+      <div style="font-size:13px; color:var(--text);">${escapeHtml(line)}</div>
+    </div>
+  `).join("");
+}
+
+function selectStatusPill(el, statusVal) {
+  // Remove selected from all pills
+  const grid = document.getElementById('detailStatusPillGrid');
+  if (grid) grid.querySelectorAll('.status-radio-pill').forEach(p => p.classList.remove('selected'));
+  // Mark this one
+  el.classList.add('selected');
+  // Store the value
+  const inp = document.getElementById('detailStatusInput');
+  if (inp) inp.value = statusVal;
+
+  // Update the status header pill
+  const statusHeader = document.getElementById('detailStatusHeader');
+  if (statusHeader) {
+    if (!statusVal || statusVal.toLowerCase() === 'open') {
+      statusHeader.className = 'pill open';
+      statusHeader.innerText = 'OPEN';
+    } else {
+      statusHeader.className = 'pill closed';
+      statusHeader.innerText = statusVal.toUpperCase();
+    }
+  }
+}
+
+function addRemarkLogInstant() {
+  const txt = document.getElementById("newRemarkText").value.trim();
+  if (!txt || !currentOpenJobNo) return;
+
+  const t = ticketsData.find(x => x.jobNo === currentOpenJobNo);
+  if (t) {
+    const todayStr = getTodayFormatted();
+    const logLine = `${todayStr} - ${currentUserObj.name || 'Staff'} - ${txt}`;
+    t.remark = t.remark ? `${logLine}\n${t.remark}` : logLine;
+    t.lastUpdatedDate = todayStr;
+    t.updatedToday = true;
+
+    renderDetailLogs(t.remark);
+    renderTicketsTable();
+    renderStats();
+    generateNotifications();
+    document.getElementById("newRemarkText").value = "";
+    showBottomRightToast('Remark Logged', 'Added to timeline and saving to sheet...');
+
+    if (typeof google !== "undefined" && google.script && google.script.run) {
+      google.script.run.updateTicket({ jobNo: currentOpenJobNo, newRemark: txt, updatedBy: currentUserObj.username });
+    }
+  }
+}
+
+function saveTicketDetailsInstant() {
+  if (!currentOpenJobNo) return;
+  const t = ticketsData.find(x => x.jobNo === currentOpenJobNo);
+  if (!t) return;
+
+  const newPartyName = document.getElementById("detailPartyNameInput").value.trim();
+  const newPartyPhone = document.getElementById("detailPartyPhoneInput").value.trim();
+  const newDept = document.getElementById("detailDept").value;
+  const newPriority = getPriorityValue("detailPriorityTag", "detailPriorityCustomInput");
+  const newMode = document.getElementById("detailMode") ? document.getElementById("detailMode").value : "Helpline";
+  let newAssigned = document.getElementById("detailAssigned").value;
+  const newStatus = document.getElementById("detailStatusInput").value;
+  const pendingRemark = (document.getElementById("newRemarkText").value || '').trim();
+
+  let finalPartyForSheet = newPartyName;
+  if (newPartyPhone && !newPartyName.includes(newPartyPhone)) {
+    finalPartyForSheet = `${newPartyName} ${newPartyPhone}`;
+  }
+
+  const newPlace = (t.place || '');
+  t.partyName = finalPartyForSheet;
+  t.phone = newPartyPhone;
+  t.place = newPlace;
+
+  const newWrittenBy = document.getElementById("detailWrittenByInput") ? document.getElementById("detailWrittenByInput").value.trim() : (t.writtenBy || 'User');
+  t.writtenBy = newWrittenBy;
+
+  const isNonOpen = (newStatus && newStatus !== '' && newStatus.toLowerCase() !== 'open');
+
+  // Rule: Non-open status (Closed / Solved / etc.) CANNOT remain Unassigned!
+  // Automatically assign the logged-in user if still Unassigned.
+  if (isNonOpen && (!newAssigned || newAssigned === 'Unassigned')) {
+    newAssigned = currentUserObj.name || currentUserObj.username || 'Staff';
+    document.getElementById("detailAssigned").value = mapDisplayNameToSheetUsername(newAssigned);
+  }
+
+  const prevStatus = t.status || '';
+  const isReopening = (prevStatus && prevStatus !== '' && prevStatus !== 'Open') && (newStatus === '' || newStatus === 'Open');
+  const isClosing = (!prevStatus || prevStatus === '' || prevStatus === 'Open') && isNonOpen;
+
+  t.department = newDept;
+  t.priority = newPriority;
+  t.resolvedBy = newAssigned;
+  t.status = newStatus;
+  t.isOpen = (!newStatus || newStatus === '' || newStatus === 'Open');
+
+  if (pendingRemark) {
+    const todayStr = getTodayFormatted();
+    const logLine = `${todayStr} - ${currentUserObj.name || 'Staff'} - ${pendingRemark}`;
+    t.remark = t.remark ? `${logLine}\n${t.remark}` : logLine;
+    t.lastUpdatedDate = todayStr;
+    t.updatedToday = true;
+    document.getElementById("newRemarkText").value = "";
+  }
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler((res) => {
+        if (res && res.success) {
+          showBottomRightToast('Saved ✔', `Ticket ${currentOpenJobNo} updated in sheet!`);
+        } else if (res && res.error) {
+          showBottomRightToast('Update Error ❌', res.error);
+          alert(`❌ Failed to update ticket in Google Sheet:\n${res.error}`);
+        }
+      })
+      .withFailureHandler((err) => {
+        showBottomRightToast('Server Error ❌', err.toString());
+        alert(`❌ Google Apps Script Error during update:\n${err.toString()}`);
+      })
+      .updateTicket({
+        jobNo: currentOpenJobNo,
+        rowIndex: t.rowIndex,
+        partyName: finalPartyForSheet,
+        department: newDept,
+        priorityTag: newPriority,
+        mode: newMode,
+        resolvedBy: newAssigned,
+        status: newStatus,
+        newRemark: pendingRemark || undefined,
+        fullRemark: pendingRemark ? undefined : t.remark,
+        updatedBy: currentUserObj.username || currentUserObj.name || 'Staff',
+        requestingUser: currentUserObj.username,
+        // Column I/U logic flags
+        isReopening: isReopening,
+        isClosing: isClosing
+      });
+  }
+
+  renderTicketsTable();
+  renderStats();
+  generateNotifications();
+  showBottomRightToast('Updates Saved', `Ticket ${currentOpenJobNo} updated successfully!`);
+  switchPage('tickets');
+}
+
+function openNewTicketAndDock() {
+  const paneModeEl = document.getElementById("paneNewMode");
+  if (paneModeEl) paneModeEl.value = "Helpline";
+  if (!dockedItems.some(d => d.id === 'draft')) {
+    dockedItems.push({ id: 'draft', label: '➕ Draft Ticket', type: 'draft' });
+  }
+  switchPage('newTicketPane');
+}
+
+function submitPaneNewTicket() {
+  const party = document.getElementById("paneNewPartyName").value.trim();
+  const mobile = document.getElementById("paneNewMobile").value.trim();
+  const query = document.getElementById("paneNewQuery").value.trim();
+
+  if (!party || !mobile || !query) {
+    showBottomRightToast('Required Fields Missing', 'Please fill Party Name, Mobile, and Client Query!');
+    return;
+  }
+
+  const loggedUser = currentUserObj.name || currentUserObj.username || 'Staff';
+  const modeVal = document.getElementById("paneNewMode").value || 'Helpline';
+
+  const payload = {
+    partyName: party,
+    mobilePhone: mobile,
+    department: document.getElementById("paneNewDept").value,
+    priorityTag: getPriorityValue("paneNewPriorityTag", "paneNewPriorityCustomInput"),
+    resolvedBy: document.getElementById("paneNewAssigned").value,
+    status: document.getElementById("paneNewInitialStatus").value,
+    mode: modeVal,
+    writtenBy: loggedUser,
+    query: query,
+    forceCreate: true
+  };
+
+  const todayStr = getTodayFormatted();
+  const monthNames3 = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const monthNames4 = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const nowMonthIdx = new Date().getMonth();
+  const m3 = monthNames3[nowMonthIdx];
+  const m4 = monthNames4[nowMonthIdx];
+
+  let monthCode = ["JUNE","JULY"].includes(m4) ? m4 : m3;
+  ticketsData.forEach(t => {
+    const jUpper = String(t.jobNo).toUpperCase();
+    if (jUpper.startsWith(m4)) monthCode = m4;
+    else if (jUpper.startsWith(m3)) monthCode = m3;
+  });
+
+  // Check for blank ticket row to reuse
+  const blankTicket = ticketsData.find(t => (!t.partyName || t.partyName.trim() === '' || t.partyName === t.jobNo) && t.jobNo);
+  let newJobNo = "";
+
+  if (blankTicket) {
+    newJobNo = blankTicket.jobNo;
+  } else {
+    const existingNums = ticketsData
+      .map(t => {
+        const m = String(t.jobNo).toUpperCase().match(new RegExp(`^${monthCode}(\\d+)$`));
+        return m ? parseInt(m[1], 10) : 0;
+      })
+      .filter(n => n > 0);
+    const nextNum = existingNums.length > 0 ? Math.max(...existingNums) + 1 : 1001;
+    newJobNo = `${monthCode}${nextNum}`;
+  }
+
+  const newTicketObj = {
+    jobNo: newJobNo,
+    date: todayStr,
+    partyName: `${party} ${mobile}`,  // mobile stays in party field to match sheet format
+    phone: mobile,
+    department: payload.department,
+    priority: payload.priorityTag || 'Normal',
+    query: query,
+    status: payload.status || "Open",
+    isOpen: !payload.status,
+    resolvedBy: payload.resolvedBy || 'Unassigned',
+    writtenBy: payload.writtenBy,
+    lastUpdatedDate: todayStr,
+    updatedToday: false,  // No follow-up remark yet — just created
+    remark: ''  // Empty so it shows Pending correctly
+  };
+
+  ticketsData.unshift(newTicketObj);
+  renderStats();
+  renderTicketsTable();
+  renderPerformanceDashboard();
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler((res) => {
+        if (res && res.success && res.ticket) {
+          // Update the local copy with real job no from server
+          const idx = ticketsData.findIndex(t => t.jobNo === newJobNo);
+          if (idx > -1) {
+            ticketsData[idx].jobNo = res.ticket.jobNo;
+            ticketsData[idx].rowIndex = res.ticket.rowIndex;
+          }
+          renderTicketsTable();
+          showBottomRightToast('Ticket Saved ✔', `Ticket ${res.ticket.jobNo} saved to Google Sheet!`);
+        } else {
+          const idx = ticketsData.findIndex(t => t.jobNo === newJobNo);
+          if (idx > -1) ticketsData.splice(idx, 1);
+          renderTicketsTable();
+          renderStats();
+          const errMsg = (res && (res.message || res.error)) ? (res.message || res.error) : 'Server rejected ticket save';
+          showBottomRightToast('Save Failed ❌', errMsg);
+          alert(`❌ Failed to save ticket to Google Sheet:\n${errMsg}`);
+        }
+      })
+      .withFailureHandler((err) => {
+        const idx = ticketsData.findIndex(t => t.jobNo === newJobNo);
+        if (idx > -1) ticketsData.splice(idx, 1);
+        renderTicketsTable();
+        renderStats();
+        showBottomRightToast('Server Error ❌', err.toString());
+        alert(`❌ Apps Script Error when saving ticket:\n${err.toString()}`);
+      })
+      .createTicket(payload);
+  }
+
+  dockedItems = dockedItems.filter(d => d.id !== 'draft');
+  // Clear new ticket form
+  ['paneNewPartyName','paneNewMobile','paneNewQuery'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById("paneDupNoticeBox").style.display = 'none';
+  showBottomRightToast('Ticket Created', `${newJobNo} logged — saving to sheet...`);
+  switchPage('tickets');
+}
+
+function minimizeCurrentTicketToDock() {
+  switchPage('tickets');
+}
+
+function updateDockUI() {
+  const dock = document.getElementById("bottomDock");
+  const list = document.getElementById("dockTabsList");
+
+  if (dockedItems.length === 0) {
+    dock.classList.remove("active");
+    return;
+  }
+  dock.classList.add("active");
+
+  list.innerHTML = dockedItems.map(item => `
+    <div class="dock-item ${currentOpenJobNo === item.id || (item.id === 'draft' && currentOpenPage === 'newTicketPane') ? 'active' : ''}" onclick="openDockTab('${item.id}')">
+      <span>${escapeHtml(item.label)}</span>
+      <span class="dock-close" onclick="event.stopPropagation(); removeDockItem('${item.id}')">✕</span>
+    </div>
+  `).join("");
+}
+
+function openDockTab(id) {
+  if (id === 'draft') {
+    if (currentOpenPage === 'newTicketPane') {
+      switchPage('tickets'); // MINIMIZE if already open
+    } else {
+      switchPage('newTicketPane'); // SWITCH TO DRAFT
+    }
+  } else {
+    if (currentOpenPage === 'detail' && currentOpenJobNo === id) {
+      switchPage('tickets'); // MINIMIZE if already open
+    } else {
+      openTicketDetailAndDock(id); // SWITCH TO THIS TICKET
+    }
+  }
+}
+
+function toggleCustomPriorityInput(val, inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  if (val === 'Custom Input...') {
+    el.style.display = 'block';
+    el.focus();
+  } else {
+    el.style.display = 'none';
+    el.value = '';
+  }
+}
+
+function getPriorityValue(selectId, customInputId) {
+  const selEl = document.getElementById(selectId);
+  if (!selEl) return 'Normal';
+  if (selEl.value === 'Custom Input...') {
+    const custEl = document.getElementById(customInputId);
+    return custEl ? (custEl.value.trim() || 'Normal') : 'Normal';
+  }
+  return selEl.value;
+}
+
+function removeDockItem(id) {
+  dockedItems = dockedItems.filter(d => d.id !== id);
+  if (currentOpenJobNo === id || (id === 'draft' && currentOpenPage === 'newTicketPane')) {
+    switchPage('tickets');
+  } else {
+    updateDockUI();
+  }
+}
+
+function clearAllDockTabs() {
+  dockedItems = [];
+  switchPage('tickets');
+  showBottomRightToast('Dock Cleared', 'All open tabs closed.');
+}
+
+function makeMicroSipCall() {
+  const pInput = document.getElementById("detailPartyPhoneInput");
+  const phone = pInput ? pInput.value.trim() : "";
+  if (phone) {
+    window.location.href = `sip:${phone}`;
+    showBottomRightToast('MicroSIP Dialing', `Initiated call to ${phone} via MicroSIP`);
+  }
+}
+
+function updateMicroSipBtnFromInput() {
+  // Handled dynamically by makeMicroSipCall
+}
+
+function performUniversalSearch(q) {
+  renderTicketsTable();
+}
+
+function selectStatusPill(param1, param2) {
+  let val = "";
+  let el = null;
+
+  if (typeof param1 === "string") {
+    val = param1;
+    el = param2;
+  } else if (typeof param2 === "string") {
+    val = param2;
+    el = param1;
+  } else if (param1 && param1.nodeType) {
+    el = param1;
+    val = param2 || "";
+  }
+
+  const inp = document.getElementById("detailStatusInput");
+  if (inp) inp.value = val;
+
+  const grid = document.getElementById("detailStatusPillGrid");
+  if (grid) {
+    grid.querySelectorAll(".status-radio-pill").forEach(p => p.classList.remove("selected"));
+  }
+
+  if (el && el.classList) {
+    el.classList.add("selected");
+  }
+
+  const badgeTextEl = document.getElementById("detailSelectedStatusText");
+  if (badgeTextEl) {
+    badgeTextEl.innerText = (el && el.innerText) ? el.innerText.trim() : (val || "🔴 Blank (Open)");
+  }
+}
+
+function toggleNotifPanel(e) {
+  e.stopPropagation();
+  document.getElementById("notifPanel").classList.toggle("active");
+}
+
+function showBottomRightToast(title, msg) {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<div><div style="font-weight:800; color:var(--blue);">${escapeHtml(title)}</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">${escapeHtml(msg)}</div></div>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+/* ── SYSTEM SETTINGS MODAL ── */
+function openSettingsModal() {
+  if (!isSuperAdmin()) {
+    showBottomRightToast('Access Denied', 'Only Malay (Super Admin) can access System Settings.');
+    return;
+  }
+  renderSettingsModal();
+  document.getElementById("settingsModal").classList.add("active");
+}
+function closeSettingsModal() {
+  document.getElementById("settingsModal").classList.remove("active");
+}
+function renderSettingsModal() {
+  const tbody = document.getElementById("userMappingGridBody");
+  const allowedUsernames = ["Amita", "Avani", "Dhanvi", "Dhara", "Hiral", "Hiren", "Krutika", "Khyati", "Malay", "Sanjay", "Sanjiv", "Vaibhav", "Rajendra", "Dhruva", "Kajal", "Ritesh", "Sneha", "Purvi"];
+  
+  // Merge allowedUsernames into user list if missing
+  const allUsers = [...usersList];
+  allowedUsernames.forEach(uname => {
+    if (!allUsers.some(u => u.username.toLowerCase() === uname.toLowerCase())) {
+      allUsers.push({ username: uname, name: uname, role: 'standard', departments: 'OS,TOS,Format,2017' });
+    }
+  });
+
+  tbody.innerHTML = allUsers.map(u => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px 14px; font-weight:800; font-family:var(--mono); font-size:12.5px;">${escapeHtml(u.username)}</td>
+      <td style="padding:8px 14px;"><input type="text" class="fi" id="map-name-${escapeHtml(u.username)}" value="${escapeHtml(u.name || u.username)}" style="padding:6px 12px; font-weight:600;"></td>
+    </tr>
+  `).join("");
+}
+function saveSettingsModal() {
+  const allowedUsernames = ["Amita", "Avani", "Dhanvi", "Dhara", "Hiral", "Hiren", "Krutika", "Khyati", "Malay", "Sanjay", "Sanjiv", "Vaibhav", "Rajendra", "Dhruva", "Kajal", "Ritesh", "Sneha", "Purvi"];
+  allowedUsernames.forEach(uname => {
+    const el = document.getElementById(`map-name-${uname}`);
+    if (el) {
+      const val = el.value.trim() || uname;
+      const u = usersList.find(x => x.username.toLowerCase() === uname.toLowerCase());
+      if (u) u.name = val;
+      else usersList.push({ username: uname, name: val, role: 'standard', departments: 'OS,TOS,Format,2017' });
+    }
+  });
+  rebuildUserDropdowns();
+  closeSettingsModal();
+  showBottomRightToast('Settings Saved', 'Staff display names updated.');
+}
+
+/* ── MANAGE EXECUTIVE USERS MODAL ── */
+function openManageUsersModal() {
+  if (!isAdminOrAbove()) {
+    showBottomRightToast('Access Denied', 'Only Admins and Super Admins can manage users.');
+    return;
+  }
+  renderManageUsersModal();
+  document.getElementById("manageUsersModal").classList.add("active");
+}
+function closeManageUsersModal() {
+  document.getElementById("manageUsersModal").classList.remove("active");
+}
+function renderManageUsersModal() {
+  const tbody = document.getElementById("manageUsersTableBody");
+  const badge = document.getElementById("userCountBadge");
+  if (badge) badge.innerText = `${usersList.length} users`;
+  tbody.innerHTML = usersList.map(u => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px 14px; font-weight:800; font-family:var(--mono); font-size:12px;">${escapeHtml(u.username)}</td>
+      <td style="padding:10px 14px; font-size:12px;">${escapeHtml(u.name || u.username)}</td>
+      <td style="padding:10px 14px;">
+        <span style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; 
+          background:${u.role==='super_admin'?'var(--indigo-light)':u.role==='admin'?'var(--blue-light)':'var(--surface2)'};
+          color:${u.role==='super_admin'?'var(--indigo-text)':u.role==='admin'?'var(--blue)':'var(--text2)'};
+          border:1px solid ${u.role==='super_admin'?'var(--indigo)':u.role==='admin'?'var(--blue-mid)':'var(--border)'}">
+          ${u.role==='super_admin'?'⭐ Super Admin':u.role==='admin'?'🔑 Admin':'👤 Standard'}
+        </span>
+      </td>
+      <td style="padding:10px 14px;">${(u.departments||'OS').split(',').map(d=>`<span style="font-size:10px; font-weight:700; padding:2px 6px; background:var(--blue-light); color:var(--blue); border-radius:6px; margin-right:3px;">${escapeHtml(d.trim())}</span>`).join('')}</td>
+      <td style="padding:10px 14px;"><span style="color:var(--blue); font-weight:700; cursor:pointer; font-size:12px;" onclick="editExecutiveForm('${escapeHtml(u.username)}')">✏️ Edit</span></td>
+    </tr>
+  `).join("");
+}
+function resetExecutiveForm() {
+  document.getElementById("userFormTitle").innerText = "➕ Add / Edit Executive User & Rights";
+  document.getElementById("formUsername").value = "";
+  document.getElementById("formDisplayName").value = "";
+  document.getElementById("formPassword").value = "";
+  document.getElementById("formRole").value = "standard";
+  document.getElementById("chkDeptOS").checked = true;
+  document.getElementById("chkDeptTOS").checked = true;
+  document.getElementById("chkDeptFormat").checked = false;
+  document.getElementById("chkDept2017").checked = true;
+}
+function editExecutiveForm(username) {
+  const u = usersList.find(x => x.username.toLowerCase() === username.toLowerCase());
+  if (!u) return;
+  document.getElementById("userFormTitle").innerText = `✏️ Edit Executive Rights (${u.username})`;
+  document.getElementById("formUsername").value = u.username;
+  document.getElementById("formDisplayName").value = u.name || u.username;
+  document.getElementById("formRole").value = u.role || "standard";
+
+  const depts = (u.departments || "").toUpperCase();
+  document.getElementById("chkDeptOS").checked = depts.includes("OS");
+  document.getElementById("chkDeptTOS").checked = depts.includes("TOS");
+  document.getElementById("chkDeptFormat").checked = depts.includes("FORMAT");
+  document.getElementById("chkDept2017").checked = depts.includes("2017");
+}
+function saveExecutiveUserFromForm() {
+  if (!isSuperAdmin()) {
+    showBottomRightToast('Access Denied', 'Only Super Admin (Malay) can create or modify user accounts.');
+    return;
+  }
+  const username = document.getElementById("formUsername").value.trim();
+  const displayName = document.getElementById("formDisplayName").value.trim() || username;
+  const password = document.getElementById("formPassword").value.trim();
+  const role = document.getElementById("formRole").value;
+
+  if (!username) {
+    showBottomRightToast('Input Required', 'Please enter Executive Username!');
+    return;
+  }
+
+  const selectedDepts = [];
+  if (document.getElementById("chkDeptOS").checked) selectedDepts.push("OS");
+  if (document.getElementById("chkDeptTOS").checked) selectedDepts.push("TOS");
+  if (document.getElementById("chkDeptFormat").checked) selectedDepts.push("Format");
+  if (document.getElementById("chkDept2017").checked) selectedDepts.push("2017");
+
+  const deptStr = selectedDepts.join(",");
+
+  let u = usersList.find(x => x.username.toLowerCase() === username.toLowerCase());
+  if (u) {
+    u.name = displayName;
+    u.role = role;
+    u.departments = deptStr;
+    if (password) u.password = password;
+  } else {
+    u = { username, name: displayName, password: password || "1234", role, departments: deptStr };
+    usersList.push(u);
+  }
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run.saveUser({ username, name: displayName, password, role, departments: deptStr }, currentUserObj.username);
+  }
+
+  renderManageUsersModal();
+  renderSettingsModal();
+  rebuildUserDropdowns();
+  resetExecutiveForm();
+  showBottomRightToast('User Saved', `Executive account ${username} saved successfully!`);
+}
+
+function getTodayFormatted() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+}
+
+function extractPhone(t) {
+  const m = String(t || '').match(/(\+?\d{10,12})/);
+  return m ? m[1] : '';
+}
+
+function escapeHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/* ── ROLE HELPERS ── */
+function isSuperAdmin() {
+  return currentUserObj.role === 'super_admin';
+}
+function isAdminOrAbove() {
+  return currentUserObj.role === 'super_admin' || currentUserObj.role === 'admin';
+}
+
+/* ── APPLY ROLE-BASED UI VISIBILITY ── */
+function applyRoleBasedUI() {
+  const isSA = isSuperAdmin();
+
+  // ALL admin items — only super_admin (Malay) sees them
+  ['sb-section-admin', 'sb-nav-settings', 'sb-nav-users'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isSA ? '' : 'none';
+  });
+}
+
+function addNewDeptFromInput() {
+  const input = document.getElementById("newDeptInput");
+  if (!input) return;
+  const newDept = input.value.trim();
+  if (!newDept) { showBottomRightToast('Input Required', 'Please enter a department name.'); return; }
+  ['detailDept','paneNewDept'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel && !Array.from(sel.options).some(o => o.value.toLowerCase() === newDept.toLowerCase())) {
+      sel.appendChild(new Option(newDept, newDept));
+    }
+  });
+  input.value = '';
+  showBottomRightToast('Department Added', `"${newDept}" added to department dropdowns.`);
+}
+</script>
+</body>
+</html>
