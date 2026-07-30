@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ornate Std Support - Executive Ticketing & Performance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ornate Std Support [EXP / TESTING MODE] - Executive Ticketing & Performance Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -354,6 +354,56 @@ td {padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; ve
   background:#16A34A !important; border-color:#16A34A !important; box-shadow:0 0 0 3.5px rgba(22,163,74,0.35), 0 4px 12px rgba(22,163,74,0.3) !important;
 }
 
+/* ── MOBILE APP RESPONSIVE UI DESIGN SYSTEM (6+ INCH PHONES OPTIMIZED) ── */
+@media (max-width: 768px) {
+  body { overflow-y: auto !important; height: auto !important; -webkit-tap-highlight-color: transparent; }
+  .screen { height: auto !important; min-height: 100vh; flex-direction: column !important; }
+  #screenApp { flex-direction: column !important; padding-bottom: 70px; }
+  
+  /* Mobile Sidebar Header & Top Bar */
+  .sidebar { width: 100% !important; height: auto !important; position: sticky; top: 0; z-index: 100; padding: 12px 16px !important; border-right: none !important; border-bottom: 1px solid var(--border); }
+  .sidebar-brand { margin-bottom: 0 !important; }
+  .sidebar-nav, .user-card { display: none !important; }
+
+  /* Mobile Main Content Area */
+  .main { padding: 14px 12px !important; overflow-y: visible !important; height: auto !important; }
+  .header-bar { flex-direction: column; align-items: stretch !important; gap: 12px !important; }
+  .header-actions { flex-wrap: wrap; width: 100%; justify-content: space-between; gap: 8px; }
+  .header-actions button, .header-actions input { flex: 1; min-width: 140px; }
+
+  /* Mobile KPI Grid & Performance Grid */
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .perf-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  
+  /* Mobile 2-Pane Stack Layout (Page 3 & Page 4) */
+  .detail-grid { grid-template-columns: 1fr !important; gap: 16px !important; min-height: auto !important; }
+  .detail-card { min-height: auto !important; padding: 16px !important; border-radius: 16px !important; }
+
+  /* Mobile Large Touch Targets (Min 46px - 48px Height) */
+  .fi, .btn-new-ticket, .btn-microsip-call, select, input[type="text"] {
+    height: 48px !important; font-size: 14px !important; border-radius: 12px !important;
+  }
+  textarea.fi { min-height: 80px !important; }
+  .status-radio-pill { padding: 10px 16px !important; font-size: 13px !important; min-height: 44px; align-items: center; }
+
+  /* Mobile Fixed Bottom Navigation App Bar */
+  .mobile-app-nav-bar {
+    display: flex !important; position: fixed; bottom: 0; left: 0; width: 100vw; height: 62px;
+    background: var(--surface); border-top: 1.5px solid var(--border); box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+    z-index: 99999; justify-content: space-around; align-items: center; padding: 0 4px;
+  }
+  .mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; color: var(--text2); font-size: 10.5px; font-weight: 700; text-decoration: none;
+    flex: 1; height: 100%; cursor: pointer; transition: color .2s;
+  }
+  .mobile-nav-item.active { color: var(--blue) !important; font-weight: 800; }
+  .mobile-nav-item span.icon { font-size: 19px; }
+
+  /* Hide desktop bottom dock on mobile when mobile app bar is active */
+  #bottomDock { display: none !important; }
+}
+
 /* ONLY SCROLL IN ACTIVITY REMARKS BOX */
 .timeline-scroll-box {
   flex:1; min-height:280px; max-height:440px; overflow-y:auto; padding-right:6px;
@@ -500,7 +550,7 @@ td {padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; ve
   <main class="main" id="mainContainer">
     <div class="header-bar">
       <div>
-        <div class="header-title" id="pageHeaderTitle">📊 All Support Tickets</div>
+        <div class="header-title" id="pageHeaderTitle">🧪 Ornate Std Support [Testing Mode]</div>
         <div class="header-sub" id="pageHeaderSub">Live ticket queue with latest remark log history</div>
       </div>
 
@@ -872,11 +922,31 @@ td {padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; ve
       </div>
     </div>
 
-    <!-- BOTTOM DOCK BAR -->
+    <!-- BOTTOM DOCK BAR (DESKTOP) -->
     <div id="bottomDock">
       <span style="font-size:11px; font-weight:800; color:var(--text3);">OPEN TABS:</span>
       <div id="dockTabsList" style="display:flex; align-items:center; gap:8px; overflow-x:auto; flex:1;"></div>
       <button style="background:none; border:none; color:var(--red-text); font-weight:800; font-size:11.5px; cursor:pointer;" onclick="clearAllDockTabs()">🗑️ Clear Dock / Close All</button>
+    </div>
+
+    <!-- MOBILE APP BOTTOM DOCK NAV BAR -->
+    <div class="mobile-app-nav-bar" style="display:none;">
+      <div class="mobile-nav-item active" onclick="switchPage('tickets')">
+        <span class="icon">📱</span>
+        <span>Tickets</span>
+      </div>
+      <div class="mobile-nav-item" onclick="openNewTicketAndDock()">
+        <span class="icon">➕</span>
+        <span>New Ticket</span>
+      </div>
+      <div class="mobile-nav-item" onclick="switchPage('perf')">
+        <span class="icon">📊</span>
+        <span>Analytics</span>
+      </div>
+      <div class="mobile-nav-item" onclick="openSettingsModal()">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
+      </div>
     </div>
   </main>
 </div>
@@ -1268,7 +1338,7 @@ function autoFillPartyDetailsFromHistory(jobNo) {
   checkPaneDuplicates();
 }
 
-function formatJobNo(val) {
+function formatJobNo_exp(val) {
   if (!val) return "";
   if (val instanceof Date) {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1444,7 +1514,7 @@ function performLogin() {
         resetLoginBtn();
         localLoginFallback(u, p);
       })
-      .loginUser(u, p);
+      .loginUser_exp(u, p);
   } else {
     resetLoginBtn();
     localLoginFallback(u, p);
@@ -1532,7 +1602,7 @@ function syncData(isManual = false) {
 
           if (res.tickets && res.tickets.length > 0) {
             res.tickets.forEach(t => {
-              t.jobNo = formatJobNo(t.jobNo);
+              t.jobNo = formatJobNo_exp(t.jobNo);
             });
             if (!isFirstSync) {
               res.tickets.forEach(t => {
@@ -1569,7 +1639,7 @@ function syncData(isManual = false) {
         renderPerformanceDashboard();
         generateNotifications();
       })
-      .getInitialData(currentUserObj.username || '');
+      .getInitialData_exp(currentUserObj.username || '');
   } else {
     finishSync();
     if (knownTicketJobNos.size === 0) {
@@ -1632,7 +1702,7 @@ function rebuildUserDropdowns() {
   });
 }
 
-function mapDisplayNameToSheetUsername(displayName) {
+function mapDisplayNameToSheetUsername_exp(displayName) {
   if (!displayName) return "";
   const str = String(displayName).trim();
   if (str.toLowerCase() === "unassigned" || str === "") return "";
@@ -2374,7 +2444,7 @@ function addRemarkLogInstant() {
     showBottomRightToast('Remark Logged', 'Added to timeline and saving to sheet...');
 
     if (typeof google !== "undefined" && google.script && google.script.run) {
-      google.script.run.updateTicket({ jobNo: currentOpenJobNo, newRemark: txt, updatedBy: currentUserObj.username });
+      google.script.run.updateTicket_exp({ jobNo: currentOpenJobNo, newRemark: txt, updatedBy: currentUserObj.username });
     }
   }
 }
@@ -2412,7 +2482,7 @@ function saveTicketDetailsInstant() {
   // Automatically assign the logged-in user if still Unassigned.
   if (isNonOpen && (!newAssigned || newAssigned === 'Unassigned')) {
     newAssigned = currentUserObj.name || currentUserObj.username || 'Staff';
-    document.getElementById("detailAssigned").value = mapDisplayNameToSheetUsername(newAssigned);
+    document.getElementById("detailAssigned").value = mapDisplayNameToSheetUsername_exp(newAssigned);
   }
 
   const prevStatus = t.status || '';
@@ -2448,7 +2518,7 @@ function saveTicketDetailsInstant() {
         showBottomRightToast('Server Error ❌', err.toString());
         alert(`❌ Google Apps Script Error during update:\n${err.toString()}`);
       })
-      .updateTicket({
+      .updateTicket_exp({
         jobNo: currentOpenJobNo,
         rowIndex: t.rowIndex,
         partyName: finalPartyForSheet,
@@ -2592,7 +2662,7 @@ function submitPaneNewTicket() {
         showBottomRightToast('Server Error ❌', err.toString());
         alert(`❌ Apps Script Error when saving ticket:\n${err.toString()}`);
       })
-      .createTicket(payload);
+      .createTicket_exp(payload);
   }
 
   dockedItems = dockedItems.filter(d => d.id !== 'draft');
@@ -2882,7 +2952,7 @@ function saveExecutiveUserFromForm() {
   }
 
   if (typeof google !== "undefined" && google.script && google.script.run) {
-    google.script.run.saveUser({ username, name: displayName, password, role, departments: deptStr }, currentUserObj.username);
+    google.script.run.saveUser_exp({ username, name: displayName, password, role, departments: deptStr }, currentUserObj.username);
   }
 
   renderManageUsersModal();
